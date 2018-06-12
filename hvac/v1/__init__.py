@@ -603,29 +603,29 @@ class Client(object):
     def auth_aws_iam(self, access_key, secret_key, session_token=None, header_value=None, mount_point='aws', role='', use_token=True):
         """
         POST /auth/<mount point>/login
+        :param access_key: str, AWS IAM access key ID
+        :param secret_key: str, AWS IAM secret access key
+        :param session_token: str, Optional string received from AWS STS when obtaining temporary security credentials
+        :param header_value: str, Value corresponding to the AWS auth backend config's iam_server_id_header_value setting
+        :param mount_point: str, The path under which the AWS auth backend is mounted
+        :param role: str, Name of the role against which the login is being attempted.
+        :param use_token: bool, if True, uses the token in the response received from the auth request to set the "token"
+        :return: dict, parsed JSON response from the auth POST request
         """
-        request = requests.Request(
-            method='POST',
-            url='https://sts.amazonaws.com/',
-            headers={'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8', 'Host': 'sts.amazonaws.com'},
-            data='Action=GetCallerIdentity&Version=2011-06-15',
+
+        signed_request = aws_utils.generate_sigv4_authorization_request(
+            access_key=access_key,
+            secret_key=secret_key,
+            session_token=session_token,
+            header_value=header_value
         )
-
-        if header_value:
-            request.headers['X-Vault-AWS-IAM-Server-ID'] = header_value
-
-        request = request.prepare()
-
-        auth = aws_utils.SigV4Auth(access_key, secret_key, session_token)
-        auth.add_auth(request)
-
         # https://github.com/hashicorp/vault/blob/master/builtin/credential/aws/cli.go
-        headers = json.dumps({k: [request.headers[k]] for k in request.headers})
+        headers = json.dumps({k: [signed_request.headers[k]] for k in signed_request.headers})
         params = {
-            'iam_http_request_method': request.method,
-            'iam_request_url': b64encode(request.url.encode('utf-8')).decode('utf-8'),
+            'iam_http_request_method': signed_request.method,
+            'iam_request_url': b64encode(signed_request.url.encode('utf-8')).decode('utf-8'),
             'iam_request_headers': b64encode(headers.encode('utf-8')).decode('utf-8'),
-            'iam_request_body': b64encode(request.body.encode('utf-8')).decode('utf-8'),
+            'iam_request_body': b64encode(signed_request.body.encode('utf-8')).decode('utf-8'),
             'role': role,
         }
 
