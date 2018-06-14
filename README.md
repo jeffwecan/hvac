@@ -239,12 +239,26 @@ print(client.is_sealed()) # => True
 
 ## Testing
 
+### Python Unittest
+
 Integration tests will automatically start a Vault server in the background. Just make sure
 the latest `vault` binary is available in your `PATH`.
 
 1. [Install Vault](https://vaultproject.io/docs/install/index.html) or execute `VAULT_BRANCH=release scripts/install-vault-release.sh`
 2. [Install Tox](http://tox.readthedocs.org/en/latest/install.html)
 3. Run tests: `make test`
+
+### Linting
+
+Python linting is handled as part of the repository's tox configuration and utilizes flake8 for that purpose.
+
+Markdown linting is done via the [markdownlint / mdl](https://github.com/markdownlint/markdownlint/) Ruby gem. This is
+done to catch any obvious syntactially issues that would prevent the included markdown content from being parsed correctly.
+If needed, this test step can be run locally by:
+
+1. [Installing Ruby](https://www.ruby-lang.org/en/documentation/installation/).
+2. [Installing the mdl gem](https://github.com/markdownlint/markdownlint#installation): `gem install mdl`.
+3. Run the assocaited Makefile job: `make lint-markdown`.
 
 ## Contributing
 
