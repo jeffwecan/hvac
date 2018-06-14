@@ -1,3 +1,5 @@
+# Changelog
+
 ## 0.4.0 (February 1, 2018)
 
 IMPROVEMENTS:
@@ -9,7 +11,7 @@ BUG FIXES:
 
 * Documentation is now more accurate [GH-165] / [GH-154]
 
-Thanks to @ti-mo, @dhoeric, @RAbraham, @lhdumittan, @ahsanali for 
+Thanks to @ti-mo, @dhoeric, @RAbraham, @lhdumittan, @ahsanali for
 their lovely contributions.
 
 ## 0.3.0 (November 9, 2017)
