@@ -1,7 +1,8 @@
 #!/bin/bash
 set -eux
 
-VAULT_VERSION=0.11.1
+DEFAULT_VAULT_VERSION=0.11.1
+VAULT_VERSION=${1:-$DEFAULT_VAULT_VERSION}
 
 mkdir -p $HOME/bin
 

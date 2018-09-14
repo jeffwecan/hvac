@@ -320,8 +320,7 @@ class TestLdap(utils.HvacIntegrationTestCase, TestCase):
 
     @parameterized.expand([
         ('working creds with policy', LDAP_USER_NAME, LDAP_USER_PASSWORD, True),
-        ('working creds no membership', LDAP_USER_NAME, LDAP_USER_PASSWORD, False, exceptions.InvalidRequest,
-         'user is not a member of any authorized group'),
+        ('working creds no membership', LDAP_USER_NAME, LDAP_USER_PASSWORD, False),
         ('invalid creds', 'not_your_dude_pal', 'some other dudes password', False, exceptions.InvalidRequest,
          'ldap operation failed'),
     ])
@@ -361,10 +360,6 @@ class TestLdap(utils.HvacIntegrationTestCase, TestCase):
                 username=username,
                 password=password,
             )
-            self.assertEqual(
-                first=['default', test_policy_name],
-                second=login_response['auth']['policies']
-            )
             self.assertDictEqual(
                 d1=dict(username=username),
                 d2=login_response['auth']['metadata'],
@@ -372,4 +367,12 @@ class TestLdap(utils.HvacIntegrationTestCase, TestCase):
             self.assertEqual(
                 first=login_response['auth']['client_token'],
                 second=self.client.token,
+            )
+            if attach_policy:
+                expected_policies = ['default', test_policy_name]
+            else:
+                expected_policies = ['default']
+            self.assertEqual(
+                first=expected_policies,
+                second=login_response['auth']['policies']
             )
