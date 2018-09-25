@@ -7,8 +7,7 @@ from hvac import exceptions
 from hvac.tests import utils
 from unittest import skipIf
 
-
-@skipIf(StrictVersion(getenv('VAULT_VERSION', '0.11.1')) < StrictVersion('0.10.0'), "not supported in this library version")
+@skipIf(StrictVersion(getenv('VAULT_VERSION', utils.LATEST_VAULT_VERSION)) < StrictVersion('0.10.0'), "not supported in this library version")
 class TestKvV2(utils.HvacIntegrationTestCase, TestCase):
     DEFAULT_MOUNT_POINT = 'kvv2'
 
