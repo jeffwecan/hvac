@@ -25,5 +25,5 @@ install:
 - pip install tox
 script:
 - export PATH=$HOME/bin:$PATH
-- export VAULT_VERSION=${VAULT_VERSION}
+# - export VAULT_VERSION=${VAULT_VERSION}
 - make test
