@@ -30,6 +30,7 @@ class TestKvV2(utils.HvacIntegrationTestCase, TestCase):
         ('set max versions and cas required', 17, True),
     ])
     def test_configure_and_read_configuration(self, test_label, max_versions=10, cas_required=None):
+        logging.debug("getenv('VAULT_VERSION', utils.LATEST_VAULT_VERSION): %s" % getenv('VAULT_VERSION', utils.LATEST_VAULT_VERSION))
         configure_arguments = dict(mount_point=self.DEFAULT_MOUNT_POINT)
         if max_versions is not None:
             configure_arguments['max_versions'] = max_versions
