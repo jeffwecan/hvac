@@ -4,7 +4,10 @@ language: python
 matrix:
   include:
   - python: '2.7'
-    env: TOXENV=py27 VAULT_BRANCH=release VAULT_VERSION=0.8.3
+    env:
+      - TOXENV=py27
+      - VAULT_BRANCH=release
+      - VAULT_VERSION=0.8.3
   # - python: '2.7'
   #   env: TOXENV=py27 VAULT_BRANCH=release
   # - python: '2.7'
