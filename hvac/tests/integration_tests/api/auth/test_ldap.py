@@ -1,6 +1,6 @@
 import logging
 from unittest import TestCase
-
+import operator
 from ldap_test import LdapServer
 from parameterized import parameterized
 
@@ -320,14 +320,14 @@ class TestLdap(utils.HvacIntegrationTestCase, TestCase):
 
     @parameterized.expand([
         ('working creds with policy', LDAP_USER_NAME, LDAP_USER_PASSWORD, True),
-        ('working creds no membership', LDAP_USER_NAME, LDAP_USER_PASSWORD, False),
-        ('working creds no membership', LDAP_USER_NAME, LDAP_USER_PASSWORD, False, exceptions.InvalidRequest,
--         'user is not a member of any authorized group', '0.10.3'),  # see: https://github.com/hashicorp/vault/blob/master/CHANGELOG.md#0103-june-20th-2018
+        ('working creds no membership', LDAP_USER_NAME, LDAP_USER_PASSWORD, False, None, None, ('0.10.3', operator.lt)),
+        ('working creds no membership', LDAP_USER_NAME, LDAP_USER_PASSWORD, False, exceptions.InvalidRequest, 'user is not a member of any authorized group', ('0.10.3', operator.ge)),
         ('invalid creds', 'not_your_dude_pal', 'some other dudes password', False, exceptions.InvalidRequest,
-         'ldap operation failed'),
+         ''),
     ])
     def test_login(self, test_label, username, password, attach_policy, raises=None, exception_message='', skip_if_version=None):
-        if skip_if_version is not None and utils.skip_if_vault_version(skip_if_version), "skipping case for current vault version"):
+        if skip_if_version is not None and utils.skip_if_vault_version(skip_if_version[0], skip_if_version[1]):
+            self.skipTest("skipping case for current vault version")
 
         test_policy_name = 'test-ldap-policy'
         self.client.ldap.configure(

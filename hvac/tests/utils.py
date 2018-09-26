@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import operator
 import re
 import socket
 import subprocess
@@ -23,8 +24,8 @@ VERSION_REGEX = re.compile('Vault v([\d\.]+)')
 LATEST_VAULT_VERSION = '0.11.1'
 
 
-def skip_if_vault_version(supported_version):
-    return StrictVersion(os.getenv('VAULT_VERSION', LATEST_VAULT_VERSION)) < StrictVersion(supported_version)
+def skip_if_vault_version(supported_version, comparison=operator.lt):
+    return comparison(StrictVersion(os.getenv('VAULT_VERSION', LATEST_VAULT_VERSION)), StrictVersion(supported_version))
 
 
 def create_client(**kwargs):
