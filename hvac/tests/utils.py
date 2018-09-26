@@ -6,6 +6,7 @@ import re
 import socket
 import subprocess
 import time
+from distutils.version import StrictVersion
 
 from hvac import Client
 
@@ -20,6 +21,10 @@ logger = logging.getLogger(__name__)
 
 VERSION_REGEX = re.compile('Vault v([\d\.]+)')
 LATEST_VAULT_VERSION = '0.11.1'
+
+
+def skip_if_vault_version(supported_version):
+    return StrictVersion(os.getenv('VAULT_VERSION', LATEST_VAULT_VERSION)) < StrictVersion(supported_version)
 
 
 def create_client(**kwargs):
