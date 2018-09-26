@@ -3,14 +3,10 @@ sudo: false
 language: python
 matrix:
   include:
-  - python: '2.7'
-    env:
-      - TOXENV=py27
-      - VAULT_VERSION=0.8.3
-   - python: '2.7'
-     env:
-      - TOXENV=py27
-      - VAULT_VERSION=0.11.1
+    - python: '2.7'
+      env: TOXENV=py27 VAULT_VERSION=0.8.3
+    - python: '2.7'
+      env: TOXENV=py27 VAULT_VERSION=0.11.1
   # - python: '2.7'
   #   env: TOXENV=py27-flake8 VAULT_BRANCH=release
   # - python: '3.6'
@@ -25,9 +21,8 @@ matrix:
   # - python: '3.6'
   #   env: TOXENV=py36 VAULT_BRANCH=head
 install:
-- scripts/install-vault.sh ${VAULT_VERSION}
-- pip install tox
+  - scripts/install-vault.sh ${VAULT_VERSION}
+  - pip install tox
 script:
-- export PATH=$HOME/bin:$PATH
-# - export VAULT_VERSION=${VAULT_VERSION}
-- make test
+  - export PATH=$HOME/bin:$PATH
+  - make test
