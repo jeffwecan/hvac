@@ -4,7 +4,7 @@ set -eux
 DEFAULT_VAULT_VERSION=0.11.1
 VAULT_VERSION=${1:-$DEFAULT_VAULT_VERSION}
 
-if [[ "$VAULT_VERSION" == "head" ]]; then
+function build_and_install_vault_head_ref() {
     mkdir -p $HOME/bin
 
     eval "$(GIMME_GO_VERSION=1.10.3 gimme)"
@@ -22,7 +22,9 @@ if [[ "$VAULT_VERSION" == "head" ]]; then
     make dev
 
     mv bin/vault $HOME/bin
-else
+}
+
+function install_vault_release() {
     mkdir -p $HOME/bin
 
     cd /tmp
@@ -30,4 +32,10 @@ else
     curl -sOL https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip
     unzip vault_${VAULT_VERSION}_linux_amd64.zip
     mv vault $HOME/bin
+}
+
+if [[ "$(tr [A-Z] [a-z] <<<"$VAULT_VERSION")" == "head" ]]; then
+    build_and_install_vault_head_ref
+else
+    install_vault_release
 fi
