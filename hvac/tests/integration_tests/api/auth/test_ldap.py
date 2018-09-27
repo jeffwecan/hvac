@@ -1,8 +1,8 @@
 import logging
 from unittest import TestCase
-import operator
+
 from ldap_test import LdapServer
-from parameterized import parameterized
+from parameterized import parameterized, param
 
 from hvac import exceptions
 from hvac.tests import utils
@@ -319,15 +319,35 @@ class TestLdap(utils.HvacIntegrationTestCase, TestCase):
         )
 
     @parameterized.expand([
-        ('working creds with policy', LDAP_USER_NAME, LDAP_USER_PASSWORD, True),
-        ('working creds no membership', LDAP_USER_NAME, LDAP_USER_PASSWORD, False, None, None, ('0.10.3', operator.lt)),
-        ('working creds no membership', LDAP_USER_NAME, LDAP_USER_PASSWORD, False, exceptions.InvalidRequest, 'user is not a member of any authorized group', ('0.10.3', operator.ge)),
-        ('invalid creds', 'not_your_dude_pal', 'some other dudes password', False, exceptions.InvalidRequest,
-         ''),
+        param(
+            label='working creds with policy'
+        ),
+        param(
+            label='invalid creds',
+            username='not_your_dude_pal',
+            password='some other dudes password',
+            attach_policy=False,
+            raises=exceptions.InvalidRequest,
+        ),
+        # The following two test cases cover either side of the associated changelog entry for LDAP auth here:
+        # https://github.com/hashicorp/vault/blob/master/CHANGELOG.md#0103-june-20th-2018
+        param(
+            label='working creds no membership with Vault version >= 0.10.3',
+            attach_policy=False,
+            skip_due_to_vault_version=utils.skip_if_vault_version_lt('0.10.3'),
+        ),
+        param(
+            label='working creds no membership with Vault version < 0.10.3',
+            attach_policy=False,
+            raises=exceptions.InvalidRequest,
+            exception_message='user is not a member of any authorized group',
+            skip_due_to_vault_version=utils.skip_if_vault_version_ge('0.10.3'),
+        ),
     ])
-    def test_login(self, test_label, username, password, attach_policy, raises=None, exception_message='', skip_if_version=None):
-        if skip_if_version is not None and utils.skip_if_vault_version(skip_if_version[0], skip_if_version[1]):
-            self.skipTest("skipping case for current vault version")
+    def test_login(self, label, username=LDAP_USER_NAME, password=LDAP_USER_PASSWORD, attach_policy=True, raises=None,
+                   exception_message='', skip_due_to_vault_version=False):
+        if skip_due_to_vault_version:
+            self.skipTest(reason='test case does not apply to Vault version under test')
 
         test_policy_name = 'test-ldap-policy'
         self.client.ldap.configure(
