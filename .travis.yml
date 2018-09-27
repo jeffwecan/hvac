@@ -3,11 +3,31 @@ sudo: false
 language: python
 matrix:
   include:
+    - name: 'Python v2.7, Vault v0.6.0 - Integration/Unit Tests'
+      python: '2.7'
+      env:
+        - TOXENV=py27
+        - VAULT_VERSION=0.6.0
+    - name: 'Python v2.7, Vault v0.7.3 - Integration/Unit Tests'
+      python: '2.7'
+      env:
+        - TOXENV=py27
+        - VAULT_VERSION=0.7.3
     - name: 'Python v2.7, Vault v0.8.3 - Integration/Unit Tests'
       python: '2.7'
       env:
         - TOXENV=py27
         - VAULT_VERSION=0.8.3
+    - name: 'Python v2.7, Vault v0.9.6 - Integration/Unit Tests'
+      python: '2.7'
+      env:
+        - TOXENV=py27
+        - VAULT_VERSION=0.9.6
+    - name: 'Python v2.7, Vault v0.10.4 - Integration/Unit Tests'
+      python: '2.7'
+      env:
+        - TOXENV=py27
+        - VAULT_VERSION=0.10.4
     - name: 'Python v2.7, Vault v0.11.1 - Integration/Unit Tests'
       python: '2.7'
       env:
