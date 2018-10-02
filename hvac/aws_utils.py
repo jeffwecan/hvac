@@ -5,6 +5,7 @@ import requests
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 class SigV4Auth(object):
     def __init__(self, access_key, secret_key, session_token=None, region='us-east-1'):
         self.access_key = access_key
@@ -46,6 +47,9 @@ class SigV4Auth(object):
 
 
 def generate_sigv4_auth_request(header_value=None):
+=======
+def generate_sigv4_auth_request(access_key, secret_key, session_token=None, header_value=None):
+>>>>>>> Stashed changes
 =======
 def generate_sigv4_auth_request(access_key, secret_key, session_token=None, header_value=None):
 >>>>>>> Stashed changes

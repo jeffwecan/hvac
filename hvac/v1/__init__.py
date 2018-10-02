@@ -1189,8 +1189,13 @@ class Client(object):
         )
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         auth = aws_utils.SigV4Auth(access_key, secret_key, session_token, region)
         auth.add_auth(request)
+=======
+        auth = aws_utils.SigV4Auth(access_key, secret_key, session_token)
+        auth.add_auth(sigv4_auth_request)
+>>>>>>> Stashed changes
 =======
         auth = aws_utils.SigV4Auth(access_key, secret_key, session_token)
         auth.add_auth(sigv4_auth_request)
