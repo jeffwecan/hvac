@@ -4,12 +4,13 @@ HTTP Client Library Adapters
 
 """
 import logging
+import urllib
+from abc import ABCMeta, abstractmethod
 
 import requests
 import requests.exceptions
 
 from hvac import utils
-from abc import ABCMeta, abstractmethod
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +204,7 @@ class Request(Adapter):
         :return: The response of the request.
         :rtype: requests.Response
         """
+        url = urllib.quote(url)
         url = self.urljoin(self.base_uri, url)
 
         if not headers:
@@ -221,6 +223,7 @@ class Request(Adapter):
         _kwargs = self._kwargs.copy()
         _kwargs.update(kwargs)
 
+        logging.debug('Sending request to a URL of: %s' % url)
         response = self.session.request(method, url, headers=headers,
                                         allow_redirects=False, **_kwargs)
 

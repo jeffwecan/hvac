@@ -65,6 +65,9 @@ class IntegrationTest(utils.HvacIntegrationTestCase, TestCase):
         except exceptions.InvalidRequest:
             assert True
 
+        renew = self.client.renew_token()
+        raise Exception(renew)
+
     def test_userpass_auth(self):
         if 'userpass/' in self.client.list_auth_backends():
             self.client.disable_auth_backend('userpass')
@@ -1068,3 +1071,56 @@ class IntegrationTest(utils.HvacIntegrationTestCase, TestCase):
 
         # Reset integration test state
         self.client.disable_auth_backend(mount_point=test_mount_point)
+<<<<<<< Updated upstream
+=======
+
+    def test_read_lease(self):
+        # Set up a test pki backend and issue a cert against some role so we.
+        self.configure_test_pki()
+        pki_issue_response = self.client.write(
+            path='pki/issue/my-role',
+            common_name='test.hvac.com',
+        )
+
+        # Read the lease of our test cert that was just issued.
+        read_lease_response = self.client.read_lease(pki_issue_response['lease_id'])
+
+        # Validate we received the expected lease ID back in our response.
+        self.assertEquals(
+            first=pki_issue_response['lease_id'],
+            second=read_lease_response['data']['id'],
+        )
+
+        # Reset integration test state.
+        self.disable_test_pki()
+
+    def test_list_path_with_url_encoded_string(self):
+        test_data_value = 'regression_test_gh_issue_248'
+        self.client.write('secret/%1/test-path', test=test_data_value)
+        list_secret_response = self.client.list('secret/%1')
+        raise Exception(list_secret_response)
+        self.assertIn(
+            member='test-path',
+            container=list_secret_response['data']['keys'],
+        )
+
+    def test_read_path_with_url_encoded_string(self):
+        test_data_value = 'regression_test_gh_issue_248'
+        self.client.write('secret/%1', test=test_data_value)
+        response = self.client.read('secret/%1')
+        self.assertEqual(
+            first=test_data_value,
+            second=response['data']['test'],
+            msg='Ensure test_data_value ({}) is returned when providing a non-URL-encoded path ({})'.format(test_data_value, 'secret/%1'),
+        )
+        response = self.client.read('secret/%251')
+        self.assertEqual(
+            first=test_data_value,
+            second=response['data']['test'],
+            msg='Ensure test_data_value ({}) is returned when providing a previously URL-encoded path ({})'.format(test_data_value, 'secret/%251'),
+        )
+
+
+# hvac/tests/integration_tests/v1/test_integration.py
+# hvac.tests.integration_tests.v1.test_integration.IntegrationTest.test_path_with_url_encoded_string
+>>>>>>> Stashed changes
