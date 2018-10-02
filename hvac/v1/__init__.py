@@ -10,7 +10,11 @@ except ImportError:
     has_hcl_parser = False
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 from hvac import aws_utils, exceptions, adapters, utils, api
+=======
+from hvac import exceptions, adapters, utils, api
+>>>>>>> Stashed changes
 =======
 from hvac import exceptions, adapters, utils, api
 >>>>>>> Stashed changes
@@ -66,6 +70,7 @@ class Client(object):
             )
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         # Instantiate API classes to be exposed as properties on this class starting with auth method classes.
         self._github = api.auth.Github(adapter=self._adapter)
         self._ldap = api.auth.Ldap(adapter=self._adapter)
@@ -75,11 +80,16 @@ class Client(object):
         # Secret engine attributes / properties.
         self._kv = api.secrets_engines.Kv(adapter=self._adapter)
 =======
+=======
+>>>>>>> Stashed changes
         self._aws = api.AWS(adapter=self._adapter)
 
     @property
     def aws(self):
         return self._aws
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
     @property
@@ -1165,6 +1175,7 @@ class Client(object):
         return self.auth('/v1/auth/{0}/login/{1}'.format(mount_point, username), json=params, use_token=use_token)
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     def auth_aws_iam(self, access_key, secret_key, session_token=None, header_value=None, mount_point='aws', role='', use_token=True, region='us-east-1'):
         """POST /auth/<mount point>/login
 
@@ -1238,6 +1249,8 @@ class Client(object):
 
         return self.auth('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     def auth_gcp(self, role, jwt, mount_point='gcp', use_token=True):
@@ -1501,6 +1514,7 @@ class Client(object):
     )
     def auth_aws_iam(self, *args, **kwargs):
         return self._aws.auth_aws_iam(*args, **kwargs)
+<<<<<<< Updated upstream
 
     @utils.deprecated_method(
         to_be_removed_in_version='0.8.0',
@@ -1536,6 +1550,92 @@ class Client(object):
     )
     def create_vault_ec2_certificate_configuration(self, *args, **kwargs):
         return self._aws.create_vault_ec2_certificate_configuration(*args, **kwargs)
+=======
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.auth_ec2,
+    )
+    def auth_ec2(self, *args, **kwargs):
+        return self._aws.auth_ec2(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.create_vault_ec2_client_configuration,
+    )
+    def create_vault_ec2_client_configuration(self, *args, **kwargs):
+        return self._aws.create_vault_ec2_client_configuration(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.get_vault_ec2_client_configuration,
+    )
+    def get_vault_ec2_client_configuration(self, *args, **kwargs):
+        return self._aws.get_vault_ec2_client_configuration(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.delete_vault_ec2_client_configuration
+    )
+    def delete_vault_ec2_client_configuration(self, *args, **kwargs):
+        return self._aws.delete_vault_ec2_client_configuration(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.create_vault_ec2_client_configuration
+    )
+    def create_vault_ec2_certificate_configuration(self, *args, **kwargs):
+        return self._aws.create_vault_ec2_certificate_configuration(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.get_vault_ec2_certificate_configuration
+    )
+    def get_vault_ec2_certificate_configuration(self, *args, **kwargs):
+        return self._aws.get_vault_ec2_certificate_configuration(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.list_vault_ec2_certificate_configurations
+    )
+    def list_vault_ec2_certificate_configurations(self, *args, **kwargs):
+        return self._aws.list_vault_ec2_certificate_configurations(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.create_vault_ec2_client_configuration
+    )
+    def create_ec2_role(self, *args, **kwargs):
+        return self._aws.create_ec2_role(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.get_ec2_role
+    )
+    def get_ec2_role(self, *args, **kwargs):
+        return self._aws.get_ec2_role(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.delete_ec2_role
+    )
+    def delete_ec2_role(self, *args, **kwargs):
+        return self._aws.delete_ec2_role(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.list_ec2_roles
+    )
+    def list_ec2_roles(self, *args, **kwargs):
+        return self._aws.list_ec2_roles(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.create_ec2_role_tag
+    )
+    def create_ec2_role_tag(self, *args, **kwargs):
+        return self._aws.create_ec2_role_tag(*args, **kwargs)
+>>>>>>> Stashed changes
 
     @utils.deprecated_method(
         to_be_removed_in_version='0.8.0',
