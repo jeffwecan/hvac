@@ -82,9 +82,9 @@ def deprecated_method(to_be_removed_in_version, new_method=None):
         if new_method:
             new_func.__doc__ = dedent(
                 """\
-                {message}
-                Docstring content from this method's replacement copied below:
-                {new_docstring}
+                    {message}
+                    Docstring content from this method's replacement copied below:
+                    {new_docstring}
                 """.format(
                     message=message,
                     new_docstring=new_method.__doc__,

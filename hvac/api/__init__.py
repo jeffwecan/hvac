@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 """Collection of Vault API endpoint classes."""
 from hvac.api import auth
 from hvac.api.azure import Azure
@@ -10,3 +11,14 @@ __all__ = (
     'secrets_engines',
     'VaultApiBase',
 )
+=======
+"""
+Vault API Endpoints
+
+"""
+from hvac.api.aws import AWS
+
+__all__ = [
+    'AWS'
+]
+>>>>>>> Stashed changes

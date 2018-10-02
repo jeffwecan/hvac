@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import json
-from base64 import b64encode
 
 try:
     import hcl
@@ -10,7 +9,11 @@ try:
 except ImportError:
     has_hcl_parser = False
 
+<<<<<<< Updated upstream
 from hvac import aws_utils, exceptions, adapters, utils, api
+=======
+from hvac import exceptions, adapters, utils, api
+>>>>>>> Stashed changes
 
 
 class Client(object):
@@ -62,6 +65,7 @@ class Client(object):
                 namespace=namespace
             )
 
+<<<<<<< Updated upstream
         # Instantiate API classes to be exposed as properties on this class starting with auth method classes.
         self._github = api.auth.Github(adapter=self._adapter)
         self._ldap = api.auth.Ldap(adapter=self._adapter)
@@ -70,6 +74,13 @@ class Client(object):
 
         # Secret engine attributes / properties.
         self._kv = api.secrets_engines.Kv(adapter=self._adapter)
+=======
+        self._aws = api.AWS(adapter=self._adapter)
+
+    @property
+    def aws(self):
+        return self._aws
+>>>>>>> Stashed changes
 
     @property
     def adapter(self):
@@ -1153,6 +1164,7 @@ class Client(object):
 
         return self.auth('/v1/auth/{0}/login/{1}'.format(mount_point, username), json=params, use_token=use_token)
 
+<<<<<<< Updated upstream
     def auth_aws_iam(self, access_key, secret_key, session_token=None, header_value=None, mount_point='aws', role='', use_token=True, region='us-east-1'):
         """POST /auth/<mount point>/login
 
@@ -1226,6 +1238,8 @@ class Client(object):
 
         return self.auth('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
 
+=======
+>>>>>>> Stashed changes
     def auth_gcp(self, role, jwt, mount_point='gcp', use_token=True):
         """
         POST /auth/<mount point>/login
@@ -1481,251 +1495,96 @@ class Client(object):
         """
         return self._adapter.delete('/v1/auth/{0}/map/user-id/{1}'.format(mount_point, user_id))
 
-    def create_vault_ec2_client_configuration(self, access_key, secret_key, endpoint=None, mount_point='aws-ec2'):
-        """POST /auth/<mount_point>/config/client
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.auth_aws_iam,
+    )
+    def auth_aws_iam(self, *args, **kwargs):
+        return self._aws.auth_aws_iam(*args, **kwargs)
 
-        :param access_key:
-        :type access_key:
-        :param secret_key:
-        :type secret_key:
-        :param endpoint:
-        :type endpoint:
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        params = {
-            'access_key': access_key,
-            'secret_key': secret_key
-        }
-        if endpoint is not None:
-            params['endpoint'] = endpoint
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.auth_ec2,
+    )
+    def auth_ec2(self, *args, **kwargs):
+        return self._aws.auth_ec2(*args, **kwargs)
 
-        return self._adapter.post('/v1/auth/{0}/config/client'.format(mount_point), json=params)
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.create_vault_ec2_client_configuration,
+    )
+    def create_vault_ec2_client_configuration(self, *args, **kwargs):
+        return self._aws.create_vault_ec2_client_configuration(*args, **kwargs)
 
-    def get_vault_ec2_client_configuration(self, mount_point='aws-ec2'):
-        """GET /auth/<mount_point>/config/client
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.get_vault_ec2_client_configuration,
+    )
+    def get_vault_ec2_client_configuration(self, *args, **kwargs):
+        return self._aws.get_vault_ec2_client_configuration(*args, **kwargs)
 
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        return self._adapter.get('/v1/auth/{0}/config/client'.format(mount_point)).json()
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.delete_vault_ec2_client_configuration
+    )
+    def delete_vault_ec2_client_configuration(self, *args, **kwargs):
+        return self._aws.delete_vault_ec2_client_configuration(*args, **kwargs)
 
-    def delete_vault_ec2_client_configuration(self, mount_point='aws-ec2'):
-        """DELETE /auth/<mount_point>/config/client
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.create_vault_ec2_client_configuration
+    )
+    def create_vault_ec2_certificate_configuration(self, *args, **kwargs):
+        return self._aws.create_vault_ec2_certificate_configuration(*args, **kwargs)
 
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        return self._adapter.delete('/v1/auth/{0}/config/client'.format(mount_point))
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.get_vault_ec2_certificate_configuration
+    )
+    def get_vault_ec2_certificate_configuration(self, *args, **kwargs):
+        return self._aws.get_vault_ec2_certificate_configuration(*args, **kwargs)
 
-    def create_vault_ec2_certificate_configuration(self, cert_name, aws_public_cert, mount_point='aws-ec2'):
-        """POST /auth/<mount_point>/config/certificate/<cert_name>
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.list_vault_ec2_certificate_configurations
+    )
+    def list_vault_ec2_certificate_configurations(self, *args, **kwargs):
+        return self._aws.list_vault_ec2_certificate_configurations(*args, **kwargs)
 
-        :param cert_name:
-        :type cert_name:
-        :param aws_public_cert:
-        :type aws_public_cert:
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        params = {
-            'cert_name': cert_name,
-            'aws_public_cert': aws_public_cert
-        }
-        return self._adapter.post('/v1/auth/{0}/config/certificate/{1}'.format(mount_point, cert_name), json=params)
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.create_vault_ec2_client_configuration
+    )
+    def create_ec2_role(self, *args, **kwargs):
+        return self._aws.create_ec2_role(*args, **kwargs)
 
-    def get_vault_ec2_certificate_configuration(self, cert_name, mount_point='aws-ec2'):
-        """GET /auth/<mount_point>/config/certificate/<cert_name>
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.get_ec2_role
+    )
+    def get_ec2_role(self, *args, **kwargs):
+        return self._aws.get_ec2_role(*args, **kwargs)
 
-        :param cert_name:
-        :type cert_name:
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        return self._adapter.get('/v1/auth/{0}/config/certificate/{1}'.format(mount_point, cert_name)).json()
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.delete_ec2_role
+    )
+    def delete_ec2_role(self, *args, **kwargs):
+        return self._aws.delete_ec2_role(*args, **kwargs)
 
-    def list_vault_ec2_certificate_configurations(self, mount_point='aws-ec2'):
-        """GET /auth/<mount_point>/config/certificates?list=true
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.list_ec2_roles
+    )
+    def list_ec2_roles(self, *args, **kwargs):
+        return self._aws.list_ec2_roles(*args, **kwargs)
 
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        params = {'list': True}
-        return self._adapter.get('/v1/auth/{0}/config/certificates'.format(mount_point), params=params).json()
-
-    def create_ec2_role(self, role, bound_ami_id=None, bound_account_id=None, bound_iam_role_arn=None,
-                        bound_iam_instance_profile_arn=None, bound_ec2_instance_id=None, bound_region=None,
-                        bound_vpc_id=None, bound_subnet_id=None, role_tag=None,  ttl=None, max_ttl=None, period=None,
-                        policies=None, allow_instance_migration=False, disallow_reauthentication=False,
-                        resolve_aws_unique_ids=None, mount_point='aws-ec2'):
-        """POST /auth/<mount_point>/role/<role>
-
-        :param role:
-        :type role:
-        :param bound_ami_id:
-        :type bound_ami_id:
-        :param bound_account_id:
-        :type bound_account_id:
-        :param bound_iam_role_arn:
-        :type bound_iam_role_arn:
-        :param bound_iam_instance_profile_arn:
-        :type bound_iam_instance_profile_arn:
-        :param bound_ec2_instance_id:
-        :type bound_ec2_instance_id:
-        :param bound_region:
-        :type bound_region:
-        :param bound_vpc_id:
-        :type bound_vpc_id:
-        :param bound_subnet_id:
-        :type bound_subnet_id:
-        :param role_tag:
-        :type role_tag:
-        :param ttl:
-        :type ttl:
-        :param max_ttl:
-        :type max_ttl:
-        :param period:
-        :type period:
-        :param policies:
-        :type policies:
-        :param allow_instance_migration:
-        :type allow_instance_migration:
-        :param disallow_reauthentication:
-        :type disallow_reauthentication:
-        :param resolve_aws_unique_ids:
-        :type resolve_aws_unique_ids:
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        params = {
-            'role': role,
-            'auth_type': 'ec2',
-            'disallow_reauthentication': disallow_reauthentication,
-            'allow_instance_migration': allow_instance_migration
-        }
-
-        if bound_ami_id is not None:
-            params['bound_ami_id'] = bound_ami_id
-        if bound_account_id is not None:
-            params['bound_account_id'] = bound_account_id
-        if bound_iam_role_arn is not None:
-            params['bound_iam_role_arn'] = bound_iam_role_arn
-        if bound_ec2_instance_id is not None:
-            params['bound_iam_instance_profile_arn'] = bound_ec2_instance_id
-        if bound_iam_instance_profile_arn is not None:
-            params['bound_iam_instance_profile_arn'] = bound_iam_instance_profile_arn
-        if bound_region is not None:
-            params['bound_region'] = bound_region
-        if bound_vpc_id is not None:
-            params['bound_vpc_id'] = bound_vpc_id
-        if bound_subnet_id is not None:
-            params['bound_subnet_id'] = bound_subnet_id
-        if role_tag is not None:
-            params['role_tag'] = role_tag
-        if ttl is not None:
-            params['ttl'] = ttl
-        else:
-            params['ttl'] = 0
-        if max_ttl is not None:
-            params['max_ttl'] = max_ttl
-        else:
-            params['max_ttl'] = 0
-        if period is not None:
-            params['period'] = period
-        else:
-            params['period'] = 0
-        if policies is not None:
-            params['policies'] = policies
-        if resolve_aws_unique_ids is not None:
-            params['resolve_aws_unique_ids'] = resolve_aws_unique_ids
-
-        return self._adapter.post('/v1/auth/{0}/role/{1}'.format(mount_point, role), json=params)
-
-    def get_ec2_role(self, role, mount_point='aws-ec2'):
-        """GET /auth/<mount_point>/role/<role>
-
-        :param role:
-        :type role:
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        return self._adapter.get('/v1/auth/{0}/role/{1}'.format(mount_point, role)).json()
-
-    def delete_ec2_role(self, role, mount_point='aws-ec2'):
-        """DELETE /auth/<mount_point>/role/<role>
-
-        :param role:
-        :type role:
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        return self._adapter.delete('/v1/auth/{0}/role/{1}'.format(mount_point, role))
-
-    def list_ec2_roles(self, mount_point='aws-ec2'):
-        """GET /auth/<mount_point>/roles?list=true
-
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        try:
-            return self._adapter.get('/v1/auth/{0}/roles'.format(mount_point), params={'list': True}).json()
-        except exceptions.InvalidPath:
-            return None
-
-    def create_ec2_role_tag(self, role, policies=None, max_ttl=None, instance_id=None,
-                            disallow_reauthentication=False, allow_instance_migration=False, mount_point='aws-ec2'):
-        """POST /auth/<mount_point>/role/<role>/tag
-
-        :param role:
-        :type role:
-        :param policies:
-        :type policies:
-        :param max_ttl:
-        :type max_ttl:
-        :param instance_id:
-        :type instance_id:
-        :param disallow_reauthentication:
-        :type disallow_reauthentication:
-        :param allow_instance_migration:
-        :type allow_instance_migration:
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
-        """
-        params = {
-            'role': role,
-            'disallow_reauthentication': disallow_reauthentication,
-            'allow_instance_migration': allow_instance_migration
-        }
-
-        if max_ttl is not None:
-            params['max_ttl'] = max_ttl
-        if policies is not None:
-            params['policies'] = policies
-        if instance_id is not None:
-            params['instance_id'] = instance_id
-        return self._adapter.post('/v1/auth/{0}/role/{1}/tag'.format(mount_point, role), json=params)
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.AWS.create_ec2_role_tag
+    )
+    def create_ec2_role_tag(self, *args, **kwargs):
+        return self._aws.create_ec2_role_tag(*args, **kwargs)
 
     def auth_cubbyhole(self, token):
         """POST /v1/sys/wrapping/unwrap
