@@ -1181,18 +1181,28 @@ class Client(object):
         :return: The response from the AWS IAM login request attempt.
         :rtype: requests.Response
         """
-        request = aws_utils.generate_sigv4_auth_request(header_value=header_value)
+        sigv4_auth_request = aws_utils.generate_sigv4_auth_request(
+            access_key=access_key,
+            secret_key=secret_key,
+            session_token=session_token,
+            header_value=header_value,
+        )
 
+<<<<<<< Updated upstream
         auth = aws_utils.SigV4Auth(access_key, secret_key, session_token, region)
         auth.add_auth(request)
+=======
+        auth = aws_utils.SigV4Auth(access_key, secret_key, session_token)
+        auth.add_auth(sigv4_auth_request)
+>>>>>>> Stashed changes
 
         # https://github.com/hashicorp/vault/blob/master/builtin/credential/aws/cli.go
-        headers = json.dumps({k: [request.headers[k]] for k in request.headers})
+        headers = json.dumps({k: [sigv4_auth_request.headers[k]] for k in sigv4_auth_request.headers})
         params = {
-            'iam_http_request_method': request.method,
-            'iam_request_url': b64encode(request.url.encode('utf-8')).decode('utf-8'),
+            'iam_http_request_method': sigv4_auth_request.method,
+            'iam_request_url': b64encode(sigv4_auth_request.url.encode('utf-8')).decode('utf-8'),
             'iam_request_headers': b64encode(headers.encode('utf-8')).decode('utf-8'),
-            'iam_request_body': b64encode(request.body.encode('utf-8')).decode('utf-8'),
+            'iam_request_body': b64encode(sigv4_auth_request.body.encode('utf-8')).decode('utf-8'),
             'role': role,
         }
 
