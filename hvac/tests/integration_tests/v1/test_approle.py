@@ -12,14 +12,14 @@ class TestApprole(utils.HvacIntegrationTestCase, TestCase):
 
     def setUp(self):
         super(TestApprole, self).setUp()
-        self.client.enable_auth_backend(
+        self.client.sys.enable_auth_backend(
             backend_type='approle',
             mount_point=self.TEST_MOUNT_POINT,
         )
 
     def tearDown(self):
         self.client.token = self.manager.root_token
-        self.client.disable_auth_backend(mount_point=self.TEST_MOUNT_POINT)
+        self.client.sys.disable_auth_backend(mount_point=self.TEST_MOUNT_POINT)
         super(TestApprole, self).tearDown()
 
     @parameterized.expand([

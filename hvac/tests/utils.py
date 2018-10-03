@@ -181,7 +181,7 @@ class ServerManager(object):
         last_exception = None
         while attempts_left > 0:
             try:
-                self.client.is_initialized()
+                self.client.sys.is_initialized()
                 return
             except Exception as ex:
                 logger.debug('Waiting for Vault to start')
@@ -203,16 +203,16 @@ class ServerManager(object):
 
     def initialize(self):
         """Perform initialization of the vault server process and record the provided unseal keys and root token."""
-        assert not self.client.is_initialized()
+        assert not self.client.sys.is_initialized()
 
-        result = self.client.initialize()
+        result = self.client.sys.initialize()
 
         self.root_token = result['root_token']
         self.keys = result['keys']
 
     def unseal(self):
         """Unseal the vault server process."""
-        self.client.unseal_multi(self.keys)
+        self.client.sys.unseal_multi(self.keys)
 
 
 class HvacIntegrationTestCase(object):
@@ -296,7 +296,7 @@ class HvacIntegrationTestCase(object):
                     'policy': 'write'}
             }
         }
-        self.client.set_policy(name, text)
+        self.client.sys.set_policy(name, text)
         return text, obj
 
     def configure_test_pki(self, common_name='hvac.com', role_name='my-role', mount_point='pki'):
@@ -311,10 +311,10 @@ class HvacIntegrationTestCase(object):
         :return: Nothing.
         :rtype: None.
         """
-        if '{path}/'.format(path=mount_point) in self.client.list_secret_backends():
-            self.client.disable_secret_backend(mount_point)
+        if '{path}/'.format(path=mount_point) in self.client.sys.list_secret_backends():
+            self.client.sys.disable_secret_backend(mount_point)
 
-        self.client.enable_secret_backend(backend_type='pki', mount_point=mount_point)
+        self.client.sys.enable_secret_backend(backend_type='pki', mount_point=mount_point)
 
         self.client.write(
             path='{path}/root/generate/internal'.format(path=mount_point),
@@ -340,7 +340,7 @@ class HvacIntegrationTestCase(object):
         :param mount_point: The path the pki backend is mounted under.
         :type mount_point: str
         """
-        self.client.disable_secret_backend(mount_point)
+        self.client.sys.disable_secret_backend(mount_point)
 
 
 class MockGithubRequestHandler(BaseHTTPRequestHandler):

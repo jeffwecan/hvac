@@ -85,16 +85,16 @@ class TestLdap(utils.HvacIntegrationTestCase, TestCase):
 
     def setUp(self):
         super(TestLdap, self).setUp()
-        if 'ldap/' not in self.client.list_auth_backends():
-            self.client.enable_auth_backend(
+        if 'ldap/' not in self.client.sys.list_auth_backends():
+            self.client.sys.enable_auth_backend(
                 backend_type='ldap',
             )
 
     def tearDown(self):
         super(TestLdap, self).tearDown()
-        for mount_point, configuration in self.client.list_auth_backends().items():
+        for mount_point, configuration in self.client.sys.list_auth_backends().items():
             if configuration.get('type') == 'ldap':
-                self.client.disable_auth_backend(
+                self.client.sys.disable_auth_backend(
                     mount_point=mount_point,
                 )
 

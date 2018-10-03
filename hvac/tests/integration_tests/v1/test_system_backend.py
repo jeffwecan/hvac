@@ -1,5 +1,9 @@
+import binascii
 import logging
+import sys
+from base64 import b64decode
 from unittest import TestCase
+from uuid import UUID
 
 from parameterized import parameterized, param
 
@@ -12,22 +16,22 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
     def test_unseal_multi(self):
         cls = type(self)
 
-        self.client.seal()
+        self.client.sys.seal()
 
         keys = cls.manager.keys
 
-        result = self.client.unseal_multi(keys[0:2])
+        result = self.client.sys.unseal_multi(keys[0:2])
 
         self.assertTrue(result['sealed'])
         self.assertEqual(result['progress'], 2)
 
-        result = self.client.unseal_reset()
+        result = self.client.sys.unseal_reset()
         self.assertEqual(result['progress'], 0)
-        result = self.client.unseal_multi(keys[1:3])
+        result = self.client.sys.unseal_multi(keys[1:3])
         self.assertTrue(result['sealed'])
         self.assertEqual(result['progress'], 2)
-        self.client.unseal_multi(keys[0:1])
-        result = self.client.unseal_multi(keys[2:3])
+        self.client.sys.unseal_multi(keys[0:1])
+        result = self.client.sys.unseal_multi(keys[2:3])
         self.assertFalse(result['sealed'])
 
     def test_seal_unseal(self):
@@ -35,7 +39,7 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
 
         self.assertFalse(self.client.is_sealed())
 
-        self.client.seal()
+        self.client.sys.seal()
 
         self.assertTrue(self.client.is_sealed())
 
@@ -44,81 +48,81 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
         self.assertFalse(self.client.is_sealed())
 
     def test_ha_status(self):
-        self.assertIn('ha_enabled', self.client.ha_status)
+        self.assertIn('ha_enabled', self.client.sys.ha_status)
 
     def test_wrap_write(self):
-        if 'approle/' not in self.client.list_auth_backends():
-            self.client.enable_auth_backend("approle")
+        if 'approle/' not in self.client.sys.list_auth_backends():
+            self.client.sys.enable_auth_backend("approle")
 
         self.client.write("auth/approle/role/testrole")
         result = self.client.write('auth/approle/role/testrole/secret-id', wrap_ttl="10s")
         self.assertIn('token', result['wrap_info'])
-        self.client.unwrap(result['wrap_info']['token'])
-        self.client.disable_auth_backend("approle")
+        self.client.sys.unwrap(result['wrap_info']['token'])
+        self.client.sys.disable_auth_backend("approle")
 
     def test_auth_backend_manipulation(self):
-        self.assertNotIn('github/', self.client.list_auth_backends())
+        self.assertNotIn('github/', self.client.sys.list_auth_backends())
 
-        self.client.enable_auth_backend('github')
-        self.assertIn('github/', self.client.list_auth_backends())
+        self.client.sys.enable_auth_backend('github')
+        self.assertIn('github/', self.client.sys.list_auth_backends())
 
         self.client.token = self.manager.root_token
-        self.client.disable_auth_backend('github')
-        self.assertNotIn('github/', self.client.list_auth_backends())
+        self.client.sys.disable_auth_backend('github')
+        self.assertNotIn('github/', self.client.sys.list_auth_backends())
 
     def test_secret_backend_manipulation(self):
-        self.assertNotIn('test/', self.client.list_secret_backends())
+        self.assertNotIn('test/', self.client.sys.list_secret_backends())
 
-        self.client.enable_secret_backend('generic', mount_point='test')
-        self.assertIn('test/', self.client.list_secret_backends())
+        self.client.sys.enable_secret_backend('generic', mount_point='test')
+        self.assertIn('test/', self.client.sys.list_secret_backends())
 
-        secret_backend_tuning = self.client.get_secret_backend_tuning('generic', mount_point='test')
+        secret_backend_tuning = self.client.sys.get_secret_backend_tuning('generic', mount_point='test')
         self.assertEqual(secret_backend_tuning['max_lease_ttl'], 2764800)
         self.assertEqual(secret_backend_tuning['default_lease_ttl'], 2764800)
 
-        self.client.tune_secret_backend('generic', mount_point='test', default_lease_ttl='3600s', max_lease_ttl='8600s')
-        secret_backend_tuning = self.client.get_secret_backend_tuning('generic', mount_point='test')
+        self.client.sys.tune_secret_backend('generic', mount_point='test', default_lease_ttl='3600s', max_lease_ttl='8600s')
+        secret_backend_tuning = self.client.sys.get_secret_backend_tuning('generic', mount_point='test')
 
         self.assertIn('max_lease_ttl', secret_backend_tuning)
         self.assertEqual(secret_backend_tuning['max_lease_ttl'], 8600)
         self.assertIn('default_lease_ttl', secret_backend_tuning)
         self.assertEqual(secret_backend_tuning['default_lease_ttl'], 3600)
 
-        self.client.remount_secret_backend('test', 'foobar')
-        self.assertNotIn('test/', self.client.list_secret_backends())
-        self.assertIn('foobar/', self.client.list_secret_backends())
+        self.client.sys.remount_secret_backend('test', 'foobar')
+        self.assertNotIn('test/', self.client.sys.list_secret_backends())
+        self.assertIn('foobar/', self.client.sys.list_secret_backends())
 
         self.client.token = self.manager.root_token
-        self.client.disable_secret_backend('foobar')
-        self.assertNotIn('foobar/', self.client.list_secret_backends())
+        self.client.sys.disable_secret_backend('foobar')
+        self.assertNotIn('foobar/', self.client.sys.list_secret_backends())
 
     def test_audit_backend_manipulation(self):
-        self.assertNotIn('tmpfile/', self.client.list_audit_backends())
+        self.assertNotIn('tmpfile/', self.client.sys.list_audit_backends())
 
         options = {
             'path': '/tmp/vault.audit.log'
         }
 
-        self.client.enable_audit_backend('file', options=options, name='tmpfile')
-        self.assertIn('tmpfile/', self.client.list_audit_backends())
+        self.client.sys.enable_audit_backend('file', options=options, name='tmpfile')
+        self.assertIn('tmpfile/', self.client.sys.list_audit_backends())
 
         self.client.token = self.manager.root_token
-        self.client.disable_audit_backend('tmpfile')
-        self.assertNotIn('tmpfile/', self.client.list_audit_backends())
+        self.client.sys.disable_audit_backend('tmpfile')
+        self.assertNotIn('tmpfile/', self.client.sys.list_audit_backends())
 
     def test_policy_manipulation(self):
-        self.assertIn('root', self.client.list_policies())
-        self.assertIsNone(self.client.get_policy('test'))
+        self.assertIn('root', self.client.sys.list_policies())
+        self.assertIsNone(self.client.sys.get_policy('test'))
         policy, parsed_policy = self.prep_policy('test')
-        self.assertIn('test', self.client.list_policies())
-        self.assertEqual(policy, self.client.get_policy('test'))
-        self.assertEqual(parsed_policy, self.client.get_policy('test', parse=True))
+        self.assertIn('test', self.client.sys.list_policies())
+        self.assertEqual(policy, self.client.sys.get_policy('test'))
+        self.assertEqual(parsed_policy, self.client.sys.get_policy('test', parse=True))
 
-        self.client.delete_policy('test')
-        self.assertNotIn('test', self.client.list_policies())
+        self.client.sys.delete_policy('test')
+        self.assertNotIn('test', self.client.sys.list_policies())
 
     def test_json_policy_manipulation(self):
-        self.assertIn('root', self.client.list_policies())
+        self.assertIn('root', self.client.sys.list_policies())
 
         policy = '''
             path "sys" {
@@ -128,11 +132,11 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
                 policy = "write"
             }
         '''
-        self.client.set_policy('test', policy)
-        self.assertIn('test', self.client.list_policies())
+        self.client.sys.set_policy('test', policy)
+        self.assertIn('test', self.client.sys.list_policies())
 
-        self.client.delete_policy('test')
-        self.assertNotIn('test', self.client.list_policies())
+        self.client.sys.delete_policy('test')
+        self.assertNotIn('test', self.client.sys.list_policies())
 
     def test_cubbyhole_auth(self):
         orig_token = self.client.token
@@ -152,36 +156,36 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
     def test_rekey_multi(self):
         cls = type(self)
 
-        self.assertFalse(self.client.rekey_status['started'])
+        self.assertFalse(self.client.sys.rekey_status['started'])
 
-        self.client.start_rekey()
-        self.assertTrue(self.client.rekey_status['started'])
+        self.client.sys.start_rekey()
+        self.assertTrue(self.client.sys.rekey_status['started'])
 
-        self.client.cancel_rekey()
-        self.assertFalse(self.client.rekey_status['started'])
+        self.client.sys.cancel_rekey()
+        self.assertFalse(self.client.sys.rekey_status['started'])
 
-        result = self.client.start_rekey()
+        result = self.client.sys.start_rekey()
 
         keys = cls.manager.keys
 
-        result = self.client.rekey_multi(keys, nonce=result['nonce'])
+        result = self.client.sys.rekey_multi(keys, nonce=result['nonce'])
         self.assertTrue(result['complete'])
 
         cls.manager.keys = result['keys']
         cls.manager.unseal()
 
     def test_rotate(self):
-        status = self.client.key_status
+        status = self.client.sys.key_status
 
-        self.client.rotate()
+        self.client.sys.rotate()
 
-        self.assertGreater(self.client.key_status['term'], status['term'])
+        self.assertGreater(self.client.sys.key_status['term'], status['term'])
 
     def test_wrapped_token_success(self):
         wrap = self.client.create_token(wrap_ttl='1m')
 
         # Unwrap token
-        result = self.client.unwrap(wrap['wrap_info']['token'])
+        result = self.client.sys.unwrap(wrap['wrap_info']['token'])
         self.assertTrue(result['auth']['client_token'])
 
         # Validate token
@@ -192,17 +196,17 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
         wrap = self.client.create_token(wrap_ttl='1m')
 
         # Intercept wrapped token
-        self.client.unwrap(wrap['wrap_info']['token'])
+        self.client.sys.unwrap(wrap['wrap_info']['token'])
 
         # Attempt to retrieve the token after it's been intercepted
         with self.assertRaises(exceptions.InvalidRequest):
-            self.client.unwrap(wrap['wrap_info']['token'])
+            self.client.sys.unwrap(wrap['wrap_info']['token'])
 
     def test_wrapped_token_cleanup(self):
         wrap = self.client.create_token(wrap_ttl='1m')
 
         _token = self.client.token
-        self.client.unwrap(wrap['wrap_info']['token'])
+        self.client.sys.unwrap(wrap['wrap_info']['token'])
         self.assertEqual(self.client.token, _token)
 
     def test_wrapped_token_revoke(self):
@@ -212,7 +216,7 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
         self.client.revoke_token(wrap['wrap_info']['wrapped_accessor'], accessor=True)
 
         # Unwrap token anyway
-        result = self.client.unwrap(wrap['wrap_info']['token'])
+        result = self.client.sys.unwrap(wrap['wrap_info']['token'])
         self.assertTrue(result['auth']['client_token'])
 
         # Attempt to validate token
@@ -224,7 +228,7 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
         self.client.token = wrap['wrap_info']['token']
 
         # Unwrap token
-        result = self.client.unwrap()
+        result = self.client.sys.unwrap()
         self.assertTrue(result['auth']['client_token'])
 
         # Validate token
@@ -237,18 +241,18 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
         self.client.token = wrap['wrap_info']['token']
 
         # Intercept wrapped token
-        self.client.unwrap()
+        self.client.sys.unwrap()
 
         # Attempt to retrieve the token after it's been intercepted
         with self.assertRaises(exceptions.InvalidRequest):
-            self.client.unwrap()
+            self.client.sys.unwrap()
 
     def test_wrapped_client_token_cleanup(self):
         wrap = self.client.create_token(wrap_ttl='1m')
 
         _token = self.client.token
         self.client.token = wrap['wrap_info']['token']
-        self.client.unwrap()
+        self.client.sys.unwrap()
 
         self.assertNotEqual(self.client.token, wrap)
         self.assertNotEqual(self.client.token, _token)
@@ -261,7 +265,7 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
 
         # Unwrap token anyway
         self.client.token = wrap['wrap_info']['token']
-        result = self.client.unwrap()
+        result = self.client.sys.unwrap()
         self.assertTrue(result['auth']['client_token'])
 
         # Attempt to validate token
@@ -271,32 +275,37 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
     def test_start_generate_root_with_completion(self):
         test_otp = 'RSMGkAqBH5WnVLrDTbZ+UQ=='
 
-        self.assertFalse(self.client.generate_root_status['started'])
-        start_generate_root_response = self.client.start_generate_root(
+        self.assertFalse(self.client.sys.generate_root_status['started'])
+        response = self.client.sys.start_generate_root(
             key=test_otp,
             otp=True,
         )
-        logging.debug('generate_root_response: %s' % start_generate_root_response)
-        self.assertTrue(self.client.generate_root_status['started'])
+        self.assertTrue(self.client.sys.generate_root_status['started'])
 
-        nonce = start_generate_root_response['nonce']
-
-        last_generate_root_response = {}
+        nonce = response['nonce']
         for key in self.manager.keys[0:3]:
-            last_generate_root_response = self.client.generate_root(
+            response = self.client.sys.generate_root(
                 key=key,
                 nonce=nonce,
             )
-        logging.debug('last_generate_root_response: %s' % last_generate_root_response)
-        self.assertFalse(self.client.generate_root_status['started'])
+        self.assertFalse(self.client.sys.generate_root_status['started'])
 
-        new_root_token = utils.decode_generated_root_token(
-            encoded_token=last_generate_root_response['encoded_root_token'],
-            otp=test_otp,
-        )
-        logging.debug('new_root_token: %s' % new_root_token)
-        token_lookup_resp = self.client.lookup_token(token=new_root_token)
-        logging.debug('token_lookup_resp: %s' % token_lookup_resp)
+        # Decode the token provided in the last response. Root token decoding logic derived from:
+        # https://github.com/hashicorp/vault/blob/284600fbefc32d8ab71b6b9d1d226f2f83b56b1d/command/operator_generate_root.go#L289
+        b64decoded_root_token = b64decode(response['encoded_root_token'])
+        if sys.version_info > (3, 0):
+            # b64decoding + bytes XOR'ing to decode the new root token in python 3.x
+            int_encoded_token = int.from_bytes(b64decoded_root_token, sys.byteorder)
+            int_otp = int.from_bytes(b64decode(test_otp), sys.byteorder)
+            xord_otp_and_token = int_otp ^ int_encoded_token
+            token_hex_string = xord_otp_and_token.to_bytes(len(b64decoded_root_token), sys.byteorder).hex()
+        else:
+            # b64decoding + bytes XOR'ing to decode the new root token in python 2.7
+            otp_and_token = zip(b64decode(test_otp), b64decoded_root_token)
+            xord_otp_and_token = ''.join(chr(ord(y) ^ ord(x)) for (x, y) in otp_and_token)
+            token_hex_string = binascii.hexlify(xord_otp_and_token)
+
+        new_root_token = str(UUID(token_hex_string))
 
         # Assert our new root token is properly formed and authenticated
         self.client.token = new_root_token
@@ -310,30 +319,30 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
     def test_start_generate_root_then_cancel(self):
         test_otp = 'RSMGkAqBH5WnVLrDTbZ+UQ=='
 
-        self.assertFalse(self.client.generate_root_status['started'])
-        self.client.start_generate_root(
+        self.assertFalse(self.client.sys.generate_root_status['started'])
+        self.client.sys.start_generate_root(
             key=test_otp,
             otp=True,
         )
-        self.assertTrue(self.client.generate_root_status['started'])
+        self.assertTrue(self.client.sys.generate_root_status['started'])
 
-        self.client.cancel_generate_root()
-        self.assertFalse(self.client.generate_root_status['started'])
+        self.client.sys.cancel_generate_root()
+        self.assertFalse(self.client.sys.generate_root_status['started'])
 
     def test_tune_auth_backend(self):
         test_backend_type = 'approle'
         test_mount_point = 'tune-approle'
         test_description = 'this is a test auth backend'
         test_max_lease_ttl = 12345678
-        if '{0}/'.format(test_mount_point) in self.client.list_auth_backends():
-            self.client.disable_auth_backend(test_mount_point)
-        self.client.enable_auth_backend(
+        if '{0}/'.format(test_mount_point) in self.client.sys.list_auth_backends():
+            self.client.sys.disable_auth_backend(test_mount_point)
+        self.client.sys.enable_auth_backend(
             backend_type='approle',
             mount_point=test_mount_point
         )
 
         expected_status_code = 204
-        response = self.client.tune_auth_backend(
+        response = self.client.sys.tune_auth_backend(
             backend_type=test_backend_type,
             mount_point=test_mount_point,
             description=test_description,
@@ -344,7 +353,7 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
             second=response.status_code,
         )
 
-        response = self.client.get_auth_backend_tuning(
+        response = self.client.sys.get_auth_backend_tuning(
             backend_type=test_backend_type,
             mount_point=test_mount_point
         )
@@ -354,7 +363,7 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
             second=response['data']['max_lease_ttl']
         )
 
-        self.client.disable_auth_backend(mount_point=test_mount_point)
+        self.client.sys.disable_auth_backend(mount_point=test_mount_point)
 
     def test_read_lease(self):
         # Set up a test pki backend and issue a cert against some role so we.
@@ -365,7 +374,7 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
         )
 
         # Read the lease of our test cert that was just issued.
-        read_lease_response = self.client.read_lease(pki_issue_response['lease_id'])
+        read_lease_response = self.client.sys.read_lease(pki_issue_response['lease_id'])
 
         # Validate we received the expected lease ID back in our response.
         self.assertEquals(
@@ -389,16 +398,16 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
     ])
     def test_audit_hash(self, label, enable_first=True, test_input='hvac-rox', raises=None, exception_message=''):
         audit_backend_path = 'tmpfile'
-        self.client.disable_audit_backend('tmpfile')
+        self.client.sys.disable_audit_backend('tmpfile')
         if enable_first:
             options = {
                 'path': '/tmp/vault.audit.log'
             }
-            self.client.enable_audit_backend('file', options=options, name=audit_backend_path)
+            self.client.sys.enable_audit_backend('file', options=options, name=audit_backend_path)
 
         if raises:
             with self.assertRaises(raises) as cm:
-                self.client.audit_hash(
+                self.client.sys.audit_hash(
                     name=audit_backend_path,
                     input=test_input
                 )
@@ -408,7 +417,7 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
                     container=str(cm.exception),
                 )
         else:
-            audit_hash_response = self.client.audit_hash(
+            audit_hash_response = self.client.sys.audit_hash(
                 name=audit_backend_path,
                 input=test_input,
             )
@@ -417,10 +426,10 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
                 member='hmac-sha256:',
                 container=audit_hash_response['hash'],
             )
-        self.client.disable_audit_backend('tmpfile')
+        self.client.sys.disable_audit_backend('tmpfile')
 
     def test_get_secret_backend_tuning(self):
-        secret_backend_tuning = self.client.get_secret_backend_tuning('secret')
+        secret_backend_tuning = self.client.sys.get_secret_backend_tuning('secret')
         self.assertIn(
             member='default_lease_ttl',
             container=secret_backend_tuning,
@@ -428,7 +437,7 @@ class TestSystemBackend(utils.HvacIntegrationTestCase, TestCase):
 
     def test_get_backed_up_keys(self):
         with self.assertRaises(exceptions.InvalidRequest) as cm:
-            self.client.get_backed_up_keys()
+            self.client.sys.get_backed_up_keys()
             self.assertEqual(
                 first='no backed-up keys found',
                 second=str(cm.exception),

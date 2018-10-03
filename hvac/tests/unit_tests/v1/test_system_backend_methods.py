@@ -29,7 +29,7 @@ class TestSystemBackendMethods(TestCase):
             json=mock_response,
         )
         client = Client()
-        response = client.read_lease(
+        response = client.sys.read_lease(
             lease_id=test_lease_id,
         )
         self.assertEquals(
