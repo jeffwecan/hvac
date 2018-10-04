@@ -4,7 +4,7 @@
 import logging
 
 from hvac import exceptions
-from hvac.api.constants import VALID_AZURE_ENVIRONMENTS
+from hvac.constants import VALID_AZURE_ENVIRONMENTS
 from hvac.api.vault_api_base import VaultApiBase
 
 DEFAULT_MOUNT_POINT = 'azure'
