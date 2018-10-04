@@ -2,7 +2,7 @@ LDAP
 ====
 
 .. note::
-    Every method under the :py:attr:`Client class's ldap attribute<hvac.v1.Client.ldap>` includes a `mount_point` parameter that can be used to address the LDAP auth method under a custom mount path. E.g., If enabling the LDAP auth method using Vault's CLI commands via `vault auth enable -path=my-ldap ldap`", the `mount_point` parameter in :py:meth:`hvac.api.auth.Ldap` methods would be set to "my-ldap".
+    Every method under the :py:attr:`Client class's ldap attribute<hvac.v1.Client.ldap>` includes a `mount_point` parameter that can be used to address the LDAP auth method under a custom mount path. E.g., If enabling the LDAP auth method using Vault's CLI commands via `vault auth enable -path=my-ldap ldap`", the `mount_point` parameter in :py:meth:`hvac.api.auth_methods.Ldap` methods would be set to "my-ldap".
 
 Enabling the LDAP Auth Method
 -----------------------------
@@ -31,7 +31,7 @@ Enabling the LDAP Auth Method
 Configure LDAP Auth Method Settings
 -----------------------------------
 
-:py:meth:`hvac.api.auth.Ldap.configure`
+:py:meth:`hvac.api.auth_methods.Ldap.configure`
 
 .. code:: python
 
@@ -51,7 +51,7 @@ Configure LDAP Auth Method Settings
 Reading the LDAP Auth Method Configuration
 ------------------------------------------
 
-:py:meth:`hvac.api.auth.Ldap.read_configuration`
+:py:meth:`hvac.api.auth_methods.Ldap.read_configuration`
 
 .. code:: python
 
@@ -66,7 +66,7 @@ Reading the LDAP Auth Method Configuration
 Create or Update a LDAP Group Mapping
 -------------------------------------
 
-:py:meth:`hvac.api.auth.Ldap.create_or_update_group`
+:py:meth:`hvac.api.auth_methods.Ldap.create_or_update_group`
 
 .. code:: python
 
@@ -81,7 +81,7 @@ Create or Update a LDAP Group Mapping
 List LDAP Group Mappings
 ------------------------
 
-:py:meth:`hvac.api.auth.Ldap.list_groups`
+:py:meth:`hvac.api.auth_methods.Ldap.list_groups`
 
 .. code:: python
 
@@ -97,7 +97,7 @@ List LDAP Group Mappings
 Read LDAP Group Mapping
 -----------------------
 
-:py:meth:`hvac.api.auth.Ldap.read_group`
+:py:meth:`hvac.api.auth_methods.Ldap.read_group`
 
 .. code:: python
 
@@ -114,7 +114,7 @@ Read LDAP Group Mapping
 Deleting a LDAP Group Mapping
 -----------------------------
 
-:py:meth:`hvac.api.auth.Ldap.delete_group`
+:py:meth:`hvac.api.auth_methods.Ldap.delete_group`
 
 .. code:: python
 
@@ -128,7 +128,7 @@ Deleting a LDAP Group Mapping
 Creating or Updating a LDAP User Mapping
 ----------------------------------------
 
-:py:meth:`hvac.api.auth.Ldap.create_or_update_user`
+:py:meth:`hvac.api.auth_methods.Ldap.create_or_update_user`
 
 .. code:: python
 
@@ -143,7 +143,7 @@ Creating or Updating a LDAP User Mapping
 Listing LDAP User Mappings
 --------------------------
 
-:py:meth:`hvac.api.auth.Ldap.list_users`
+:py:meth:`hvac.api.auth_methods.Ldap.list_users`
 
 .. code:: python
 
@@ -158,7 +158,7 @@ Listing LDAP User Mappings
 Reading a LDAP User Mapping
 ---------------------------
 
-:py:meth:`hvac.api.auth.Ldap.read_user`
+:py:meth:`hvac.api.auth_methods.Ldap.read_user`
 
 .. code:: python
 
@@ -175,7 +175,7 @@ Reading a LDAP User Mapping
 Deleting a Configured User Mapping
 ----------------------------------
 
-:py:meth:`hvac.api.auth.Ldap.delete_user`
+:py:meth:`hvac.api.auth_methods.Ldap.delete_user`
 
 .. code:: python
 
@@ -189,7 +189,7 @@ Deleting a Configured User Mapping
 Authentication / Login
 ----------------------
 
-:py:meth:`hvac.api.auth.Ldap.login_with_user`
+:py:meth:`hvac.api.auth_methods.Ldap.login_with_user`
 
 For a LDAP backend mounted under a non-default (ldap) path.
 E.g., via Vault CLI with `vault auth enable -path=prod-ldap ldap`

@@ -4,7 +4,7 @@ from mock import MagicMock
 from parameterized import parameterized, param
 
 from hvac.api.azure import Azure
-from hvac.api.auth import azure as azure_auth_method
+from hvac.api.auth_methods import azure as azure_auth_method
 from hvac.api.secrets_engines import azure as azure_secret_engine
 from hvac.tests import utils
 

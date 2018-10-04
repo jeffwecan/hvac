@@ -6,7 +6,7 @@ Source Reference
 
    source/hvac_v1
    source/hvac_api
-   source/hvac_api_auth
+   source/hvac_api_auth_methods
    source/hvac_api_secrets_engines
    source/hvac_api_azure
    source/hvac_utils

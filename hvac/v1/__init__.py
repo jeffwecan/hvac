@@ -63,9 +63,9 @@ class Client(object):
             )
 
         # Instantiate API classes to be exposed as properties on this class starting with auth method classes.
-        self._github = api.auth.Github(adapter=self._adapter)
-        self._ldap = api.auth.Ldap(adapter=self._adapter)
-        self._mfa = api.auth.Mfa(adapter=self._adapter)
+        self._github = api.auth_methods.Github(adapter=self._adapter)
+        self._ldap = api.auth_methods.Ldap(adapter=self._adapter)
+        self._mfa = api.auth_methods.Mfa(adapter=self._adapter)
         self._azure = api.Azure(adapter=self._adapter)
 
         # Secret engine attributes / properties.
@@ -2689,14 +2689,14 @@ class Client(object):
 
     @utils.deprecated_method(
         to_be_removed_in_version='0.8.0',
-        new_method=api.auth.Ldap.login,
+        new_method=api.auth_methods.Ldap.login,
     )
     def auth_ldap(self, *args, **kwargs):
         return self.ldap.login(*args, **kwargs)
 
     @utils.deprecated_method(
         to_be_removed_in_version='0.8.0',
-        new_method=api.auth.Github.login,
+        new_method=api.auth_methods.Github.login,
     )
     def auth_github(self, *args, **kwargs):
         return self.github.login(*args, **kwargs)

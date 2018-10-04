@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from parameterized import parameterized
 from hvac import exceptions
-from hvac.api.auth.github import DEFAULT_MOUNT_POINT
+from hvac.api.auth_methods.github import DEFAULT_MOUNT_POINT
 from hvac.tests import utils
 from threading import Thread
 try:

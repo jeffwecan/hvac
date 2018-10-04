@@ -1,7 +1,7 @@
 Azure
 =====
 
-The :py:class:`hvac.api.azure.Azure` instance under the :py:attr:`Client class's azure attribute<hvac.v1.Client.azure>` is a wrapper to expose either the :py:class:`Azure auth method class<hvac.api.auth.Azure>` or the :py:class:`Azure secret engine class<hvac.api.secrets_engines.Azure>`. The instances of these classes are under the :py:meth:`auth<hvac.api.azure.Azure.auth>` and :py:meth:`secret<hvac.api.azure.Azure.secret>` attributes respectively.
+The :py:class:`hvac.api.azure.Azure` instance under the :py:attr:`Client class's azure attribute<hvac.v1.Client.azure>` is a wrapper to expose either the :py:class:`Azure auth method class<hvac.api.auth_methods.Azure>` or the :py:class:`Azure secret engine class<hvac.api.secrets_engines.Azure>`. The instances of these classes are under the :py:meth:`auth<hvac.api.azure.Azure.auth>` and :py:meth:`secret<hvac.api.azure.Azure.secret>` attributes respectively.
 
 Auth Method
 -----------
@@ -17,13 +17,13 @@ Calling a Azure auth method:
 	import hvac
 
 	client = hvac.Client()
-	client.azure.auth.configure(
+	client.azure.auth_methods.configure(
 		# [...]
 	)
-	client.azure.auth.create_role(
+	client.azure.auth_methods.create_role(
 		name='some-azure-role-name',
 	)
-	client.azure.auth.login(
+	client.azure.auth_methods.login(
 		role='some-azure-role-name',
 		jwt='a JWT from Azure MST...',
 	)

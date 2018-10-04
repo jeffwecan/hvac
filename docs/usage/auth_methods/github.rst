@@ -2,7 +2,7 @@ GitHub
 ======
 
 .. note::
-    Every method under the :py:attr:`Client class's github attribute<hvac.v1.Client.github>` includes a `mount_point` parameter that can be used to address the Github auth method under a custom mount path. E.g., If enabling the Github auth method using Vault's CLI commands via `vault auth enable -path=my-github github`", the `mount_point` parameter in :py:meth:`hvac.api.auth.Github` methods would be set to "my-github".
+    Every method under the :py:attr:`Client class's github attribute<hvac.v1.Client.github>` includes a `mount_point` parameter that can be used to address the Github auth method under a custom mount path. E.g., If enabling the Github auth method using Vault's CLI commands via `vault auth enable -path=my-github github`", the `mount_point` parameter in :py:meth:`hvac.api.auth_methods.Github` methods would be set to "my-github".
 
 Enabling the Auth Method
 ------------------------
@@ -30,7 +30,7 @@ Enabling the Auth Method
 Configure Connection Parameters
 -------------------------------
 
-:py:meth:`hvac.api.auth.Github.configure`
+:py:meth:`hvac.api.auth_methods.Github.configure`
 
 .. code:: python
 
@@ -45,7 +45,7 @@ Configure Connection Parameters
 Reading Configuration
 ---------------------
 
-:py:meth:`hvac.api.auth.Github.read_configuration`
+:py:meth:`hvac.api.auth_methods.Github.read_configuration`
 
 .. code:: python
 
@@ -61,7 +61,7 @@ Reading Configuration
 Mapping Teams to Policies
 -------------------------
 
-:py:meth:`hvac.api.auth.Github.map_team`
+:py:meth:`hvac.api.auth_methods.Github.map_team`
 
 .. code:: python
 
@@ -81,7 +81,7 @@ Mapping Teams to Policies
 Reading Team Mappings
 ---------------------
 
-:py:meth:`hvac.api.auth.Github.read_team_mapping`
+:py:meth:`hvac.api.auth_methods.Github.read_team_mapping`
 
 .. code:: python
 
@@ -101,7 +101,7 @@ Reading Team Mappings
 Mapping Users to Policies
 -------------------------
 
-:py:meth:`hvac.api.auth.Github.map_user`
+:py:meth:`hvac.api.auth_methods.Github.map_user`
 
 .. code:: python
 
@@ -121,7 +121,7 @@ Mapping Users to Policies
 Reading User Mappings
 ---------------------
 
-:py:meth:`hvac.api.auth.Github.read_user_mapping`
+:py:meth:`hvac.api.auth_methods.Github.read_user_mapping`
 
 .. code:: python
 
@@ -140,7 +140,7 @@ Reading User Mappings
 Authentication / Login
 ----------------------
 
-:py:meth:`hvac.api.auth.Github.login`
+:py:meth:`hvac.api.auth_methods.Github.login`
 
 Log in and automatically update the underlying "token" attribute on the :py:meth:`hvac.adapters.Adapter` instance:
 
