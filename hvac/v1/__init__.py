@@ -19,7 +19,7 @@ class Client(object):
     def __init__(self, url='http://localhost:8200', token=None,
                  cert=None, verify=True, timeout=30, proxies=None,
                  allow_redirects=True, session=None, adapter=None, namespace=None):
-        """Creates a new hvac client instnace.
+        """Creates a new hvac client instance.
 
         :param url: Base URL for the Vault instance being addressed.
         :type url: str
@@ -33,7 +33,7 @@ class Client(object):
         :type verify: Union[bool,str]
         :param timeout: The timeout value for requests sent to Vault.
         :type timeout: int
-        :param proxies: Proxies to use when preforming requests.
+        :param proxies: Proxies to use when performing requests.
             See: http://docs.python-requests.org/en/master/user/advanced/#proxies
         :type proxies: dict
         :param allow_redirects: Whether to follow redirects when sending requests to Vault.
@@ -63,9 +63,11 @@ class Client(object):
             )
 
         # Instantiate API classes to be exposed as properties on this class starting with auth method classes.
-        self._github = api.auth_methods.Github(adapter=self._adapter)
-        self._ldap = api.auth_methods.Ldap(adapter=self._adapter)
-        self._mfa = api.auth_methods.Mfa(adapter=self._adapter)
+        self._gcp = api.Gcp(adapter=self._adapter)
+        self._github = api.auth.Github(adapter=self._adapter)
+        self._ldap = api.auth.Ldap(adapter=self._adapter)
+        self._mfa = api.auth.Mfa(adapter=self._adapter)
+
         self._azure = api.Azure(adapter=self._adapter)
 
         # Secret engine attributes / properties.
@@ -110,6 +112,15 @@ class Client(object):
     @allow_redirects.setter
     def allow_redirects(self, allow_redirects):
         self._adapter.allow_redirects = allow_redirects
+
+    @property
+    def gcp(self):
+        """Accessor for the Client instance's GCP methods. Provided via the :py:class:`hvac.api.Gcp` class.
+
+        :return: This Client instance's associated GCP instance.
+        :rtype: hvac.api.Gcp
+        """
+        return self._gcp
 
     @property
     def github(self):
@@ -628,7 +639,7 @@ class Client(object):
         :param audit_non_hmac_response_keys: Specifies the comma-separated list of keys that will not be HMAC'd by audit
             devices in the response data object.
         :type audit_non_hmac_response_keys: list
-        :param listing_visibility: Speficies whether to show this mount in the UI-specific listing endpoint. Valid
+        :param listing_visibility: Specifies whether to show this mount in the UI-specific listing endpoint. Valid
             values are "unauth" or "".
         :type listing_visibility: str
         :param passthrough_request_headers: Comma-separated list of headers to whitelist and pass from the request
@@ -1226,30 +1237,6 @@ class Client(object):
 
         return self.auth('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
 
-    def auth_gcp(self, role, jwt, mount_point='gcp', use_token=True):
-        """
-        POST /auth/<mount point>/login
-
-        :param role: identifier for the GCP auth backend role being requested
-        :type role: str.
-        :param jwt: JSON Web Token from the GCP metadata service
-        :type jwt: str.
-        :param mount_point: The "path" the GCP auth backend was mounted on. Vault currently defaults to "gcp".
-        :type mount_point: str.
-        :param use_token: if True, uses the token in the response received from the auth request to set the "token"
-            attribute on the current Client class instance.
-        :type use_token: bool.
-        :return: parsed JSON response from the auth POST request
-        :rtype: dict.
-        """
-
-        params = {
-            'role': role,
-            'jwt': jwt
-        }
-
-        return self.auth('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
-
     def create_userpass(self, username, password, policies, mount_point='userpass', **kwargs):
         """POST /auth/<mount point>/users/<username>
 
@@ -1484,16 +1471,31 @@ class Client(object):
     def create_vault_ec2_client_configuration(self, access_key, secret_key, endpoint=None, mount_point='aws-ec2'):
         """POST /auth/<mount_point>/config/client
 
-        :param access_key:
-        :type access_key:
-        :param secret_key:
-        :type secret_key:
-        :param endpoint:
-        :type endpoint:
-        :param mount_point:
-        :type mount_point:
-        :return:
-        :rtype:
+        Configure the credentials required to perform API calls to AWS as well as custom endpoints to talk to AWS APIs.
+        The instance identity document fetched from the PKCS#7 signature will provide the EC2 instance ID. The
+        credentials configured using this endpoint will be used to query the status of the instances via
+        DescribeInstances API. If static credentials are not provided using this endpoint, then the credentials will be
+        retrieved from the environment variables AWS_ACCESS_KEY, AWS_SECRET_KEY and AWS_REGION respectively. If the
+        credentials are still not found and if the method is configured on an EC2 instance with metadata querying
+        capabilities, the credentials are fetched automatically
+
+        :param access_key: AWS Access key with permissions to query AWS APIs. The permissions required depend on the
+            specific configurations. If using the iam auth method without inferencing, then no credentials are
+            necessary. If using the ec2 auth method or using the iam auth method with inferencing, then these
+            credentials need access to ec2:DescribeInstances. If additionally a bound_iam_role is specified, then these
+            credentials also need access to iam:GetInstanceProfile. If, however, an alternate sts configuration is set
+            for the target account, then the credentials must be permissioned to call sts:AssumeRole on the configured
+            role, and that role must have the permissions described here.
+        :type access_key: str|unicode
+        :param secret_key: AWS Secret key with permissions to query AWS APIs.
+        :type secret_key: str|unicode
+        :param endpoint: URL to override the default generated endpoint for making AWS EC2 API calls.
+        :type endpoint: str|unicode
+        :param mount_point: The "path" the AWS auth backend was mounted on. Vault currently defaults to "aws". "aws-ec2"
+            is the default argument for backwards comparability within this module.
+        :type mount_point: str|unicode
+        :return: The response of the request.
+        :rtype: requests.Response
         """
         params = {
             'access_key': access_key,
@@ -2693,6 +2695,13 @@ class Client(object):
     )
     def auth_ldap(self, *args, **kwargs):
         return self.ldap.login(*args, **kwargs)
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.8.0',
+        new_method=api.auth_methods.Github.login,
+    )
+    def auth_gcp(self, *args, **kwargs):
+        return self.gcp.auth.login(*args, **kwargs)
 
     @utils.deprecated_method(
         to_be_removed_in_version='0.8.0',
