@@ -4,7 +4,7 @@ import json
 from base64 import b64encode
 
 from hvac import aws_utils, exceptions, adapters, utils, api
-from hvac.constants import DEPRECATED_CLIENT_PROPERTIES
+from hvac.constants.client import DEPRECATED_PROPERTIES
 
 try:
     import hcl
@@ -68,9 +68,9 @@ class Client(object):
 
     def __getattr__(self, name):
         return utils.getattr_with_deprecated_properties(
-            object=self,
-            name=name,
-            deprecated_properties=DEPRECATED_CLIENT_PROPERTIES
+            obj=self,
+            item=name,
+            deprecated_properties=DEPRECATED_PROPERTIES
         )
 
     @property
@@ -116,7 +116,6 @@ class Client(object):
     @property
     def auth(self):
         """Accessor for the Client instance's auth methods. Provided via the :py:class:`hvac.api.AuthMethods` class.
-
         :return: This Client instance's associated Auth instance.
         :rtype: hvac.api.AuthMethods
         """
@@ -2663,8 +2662,8 @@ class Client(object):
         return self.auth.ldap.login(*args, **kwargs)
 
     @utils.deprecated_method(
-        to_be_removed_in_version='0.8.0',
-        new_method=api.auth_methods.Github.login,
+        to_be_removed_in_version='0.9.0',
+        new_method=api.auth_methods.Gcp.login,
     )
     def auth_gcp(self, *args, **kwargs):
         return self.auth.gcp.login(*args, **kwargs)
