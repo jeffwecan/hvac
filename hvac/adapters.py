@@ -145,7 +145,11 @@ class Adapter(object):
         return self.request('list', url, **kwargs)
 
     def login(self, url, use_token=True, **kwargs):
-        """Perform a login request and optionally stores the returned token.
+        """Perform a login request.
+
+        Associated request is typically to a path prefixed with "/v1/auth") and optionally stores the client token sent
+            in the resulting Vault response for use by the :py:meth:`hvac.adapters.Adapter` instance under the _adapater
+            Client attribute.
 
         :param url: Path to send the authentication request to.
         :type url: str | unicode
