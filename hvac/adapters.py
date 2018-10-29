@@ -144,10 +144,8 @@ class Adapter(object):
         """
         return self.request('list', url, **kwargs)
 
-    def auth(self, url, use_token=True, **kwargs):
-        """Performs a request (typically to a path prefixed with "/v1/auth") and optionaly stores the client token sent
-            in the resulting Vault response for use by the :py:meth:`hvac.adapters.Adapter` instance under the _adapater
-            Client attribute.
+    def login(self, url, use_token=True, **kwargs):
+        """Perform a login request and optionally stores the returned token.
 
         :param url: Path to send the authentication request to.
         :type url: str | unicode
@@ -183,6 +181,13 @@ class Adapter(object):
         :rtype: requests.Response
         """
         raise NotImplementedError
+
+    @utils.deprecated_method(
+        to_be_removed_in_version='0.9.0',
+        new_method=login,
+    )
+    def auth(self, *args, **kwargs):
+        return self.login(*args, **kwargs)
 
 
 class Request(Adapter):

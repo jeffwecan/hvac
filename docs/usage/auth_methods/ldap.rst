@@ -38,7 +38,7 @@ Configure LDAP Auth Method Settings
     import hvac
     client = hvac.Client()
 
-    client.ldap.configure(
+    client.auth.ldap.configure(
         user_dn='dc=users,dc=hvac,dc=network',
         group_dn='ou=groups,dc=hvac,dc=network',
         url='ldaps://ldap.hvac.network:12345',
@@ -58,7 +58,7 @@ Reading the LDAP Auth Method Configuration
     import hvac
     client = hvac.Client()
 
-    ldap_configuration = client.ldap.read_configuration()
+    ldap_configuration = client.auth.ldap.read_configuration()
     print('The LDAP auth method is configured with a LDAP server URL of: {url}'.format(
         url=ldap_configuration['data']['url']
     )
@@ -73,7 +73,7 @@ Create or Update a LDAP Group Mapping
     import hvac
     client = hvac.Client()
 
-    client.ldap.create_or_update_group(
+    client.auth.ldap.create_or_update_group(
         name='some-dudes',
         policies=['policy-for-some-dudes'],
     )
@@ -88,7 +88,7 @@ List LDAP Group Mappings
     import hvac
     client = hvac.Client()
 
-    ldap_groups = client.ldap.list_groups()
+    ldap_groups = client.auth.ldap.list_groups()
     print('The following groups are configured in the LDAP auth method: {groups}'.format(
         groups=','.join(ldap_groups['data']['keys'])
     )
@@ -104,7 +104,7 @@ Read LDAP Group Mapping
     import hvac
     client = hvac.Client()
 
-    some_dudes_ldap_group = client.ldap.read_group(
+    some_dudes_ldap_group = client.auth.ldap.read_group(
         name='somedudes',
     )
     print('The "somedudes" group in the LDAP auth method are mapped to the following policies: {policies}'.format(
@@ -121,7 +121,7 @@ Deleting a LDAP Group Mapping
     import hvac
     client = hvac.Client()
 
-    client.ldap.delete_group(
+    client.auth.ldap.delete_group(
         name='some-group',
     )
 
@@ -135,7 +135,7 @@ Creating or Updating a LDAP User Mapping
     import hvac
     client = hvac.Client()
 
-    client.ldap.create_or_update_user(
+    client.auth.ldap.create_or_update_user(
         username='somedude',
         policies=['policy-for-some-dudes'],
     )
@@ -150,7 +150,7 @@ Listing LDAP User Mappings
     import hvac
     client = hvac.Client()
 
-    ldap_users = client.ldap.list_users()
+    ldap_users = client.auth.ldap.list_users()
     print('The following users are configured in the LDAP auth method: {users}'.format(
         users=','.join(ldap_users['data']['keys'])
     )
@@ -165,7 +165,7 @@ Reading a LDAP User Mapping
     import hvac
     client = hvac.Client()
 
-    some_dude_ldap_user = client.ldap.read_user(
+    some_dude_ldap_user = client.auth.ldap.read_user(
         username='somedude'
     )
     print('The "somedude" user in the LDAP auth method is mapped to the following policies: {policies}'.format(
@@ -182,7 +182,7 @@ Deleting a Configured User Mapping
     import hvac
     client = hvac.Client()
 
-    client.ldap.delete_user(
+    client.auth.ldap.delete_user(
         username='somedude',
     )
 
@@ -207,7 +207,7 @@ E.g., via Vault CLI with `vault auth enable -path=prod-ldap ldap`
     client = hvac.Client()
 
     # Here the mount_point parameter corresponds to the path provided when enabling the backend
-    client.ldap.login(
+    client.auth.ldap.login(
         username=service_account_username,
         password=service_account_password,
         mount_point='prod-ldap'

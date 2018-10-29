@@ -1,13 +1,12 @@
 """Collection of Vault API endpoint classes."""
-from hvac.api import auth_methods
-from hvac.api.azure import Azure
-from hvac.api import secrets_engines
-from hvac.api.azure import Azure
+from hvac.api.auth_methods import AuthMethods
+from hvac.api.secrets_engines import SecretsEngines
 from hvac.api.vault_api_base import VaultApiBase
+from hvac.api.vault_api_category import VaultApiCategory
 
 __all__ = (
-    'auth_methods',
-    'Azure',
-    'secrets_engines',
+    'AuthMethods',
+    'SecretsEngines',
     'VaultApiBase',
+    'VaultApiCategory',
 )

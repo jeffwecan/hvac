@@ -37,7 +37,7 @@ Configure Connection Parameters
     import hvac
     client = hvac.Client()
 
-    client.github.configure(
+    client.auth.github.configure(
         organization='our-lovely-company',
         max_ttl='48h',  # i.e., A given token can only be renewed for up to 48 hours
     )
@@ -52,7 +52,7 @@ Reading Configuration
     import hvac
     client = hvac.Client()
 
-    github_config = client.github.read_configuration()
+    github_config = client.auth.github.read_configuration()
     print('The Github auth method is configured with a ttl of: {ttl}'.format(
         ttl=github_config['data']['ttl']
     )
@@ -73,7 +73,7 @@ Mapping Teams to Policies
         dict(name='admin-team', policies=['administrator']),
     ]
     for team in teams:
-        client.github.map_team(
+        client.auth.github.map_team(
             team_name=team['name'],
             policies=team['policies'],
         )
@@ -89,7 +89,7 @@ Reading Team Mappings
     client = hvac.Client()
 
     team_name = 'my-super-cool-team'
-    github_config = client.github.read_team_mapping(
+    github_config = client.auth.github.read_team_mapping(
         team_name=team_name,
     )
     print('The Github team {team} is mapped to the following policies: {policies}'.format(
@@ -113,7 +113,7 @@ Mapping Users to Policies
         dict(name='some-admin-user', policies=['administrator']),
     ]
     for user in users:
-        client.github.map_user(
+        client.auth.github.map_user(
             user_name=user['name'],
             policies=user['policies'],
         )
@@ -129,7 +129,7 @@ Reading User Mappings
     client = hvac.Client()
 
     user_name = 'some-dev-user'
-    github_config = client.github.read_user_mapping(
+    github_config = client.auth.github.read_user_mapping(
         user_name=user_name,
     )
     print('The Github user "{user}" is mapped to the following policies: {policies}'.format(
@@ -148,7 +148,7 @@ Log in and automatically update the underlying "token" attribute on the :py:meth
 
     import hvac
     client = hvac.Client()
-    login_response = client.github.login(token='some personal github token')
+    login_response = client.auth.github.login(token='some personal github token')
 
 
 

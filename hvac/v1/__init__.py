@@ -3,14 +3,14 @@ from __future__ import unicode_literals
 import json
 from base64 import b64encode
 
+from hvac import aws_utils, exceptions, adapters, utils, api
+from hvac.constants import DEPRECATED_CLIENT_PROPERTIES
+
 try:
     import hcl
-
     has_hcl_parser = True
 except ImportError:
     has_hcl_parser = False
-
-from hvac import aws_utils, exceptions, adapters, utils, api
 
 
 class Client(object):
@@ -63,15 +63,15 @@ class Client(object):
             )
 
         # Instantiate API classes to be exposed as properties on this class starting with auth method classes.
-        self._gcp = api.Gcp(adapter=self._adapter)
-        self._github = api.auth.Github(adapter=self._adapter)
-        self._ldap = api.auth.Ldap(adapter=self._adapter)
-        self._mfa = api.auth.Mfa(adapter=self._adapter)
+        self._auth = api.AuthMethods(adapter=self._adapter)
+        self._secrets = api.SecretsEngines(adapter=self._adapter)
 
-        self._azure = api.Azure(adapter=self._adapter)
-
-        # Secret engine attributes / properties.
-        self._kv = api.secrets_engines.Kv(adapter=self._adapter)
+    def __getattr__(self, name):
+        return utils.getattr_with_deprecated_properties(
+            object=self,
+            name=name,
+            deprecated_properties=DEPRECATED_CLIENT_PROPERTIES
+        )
 
     @property
     def adapter(self):
@@ -114,58 +114,22 @@ class Client(object):
         self._adapter.allow_redirects = allow_redirects
 
     @property
-    def gcp(self):
-        """Accessor for the Client instance's GCP methods. Provided via the :py:class:`hvac.api.Gcp` class.
+    def auth(self):
+        """Accessor for the Client instance's auth methods. Provided via the :py:class:`hvac.api.AuthMethods` class.
 
-        :return: This Client instance's associated GCP instance.
-        :rtype: hvac.api.Gcp
+        :return: This Client instance's associated Auth instance.
+        :rtype: hvac.api.AuthMethods
         """
-        return self._gcp
+        return self._auth
 
     @property
-    def github(self):
-        """Accessor for the Client instance's Github methods. Provided via the :py:class:`hvac.api.auth.Github` class.
+    def secrets(self):
+        """Accessor for the Client instance's secrets engines. Provided via the :py:class:`hvac.api.SecretsEngines` class.
 
-        :return: This Client instance's associated Github instance.
-        :rtype: hvac.api.auth.Github
+        :return: This Client instance's associated Auth instance.
+        :rtype: hvac.api.SecretsEngines
         """
-        return self._github
-
-    @property
-    def ldap(self):
-        """Accessor for the Client instance's LDAP methods. Provided via the :py:class:`hvac.api.auth.Ldap` class.
-
-        :return: This Client instance's associated Ldap instance.
-        :rtype: hvac.api.auth.Ldap
-        """
-        return self._ldap
-
-    @property
-    def mfa(self):
-        """Accessor for the Client instance's MFA methods. Provided via the :py:class:`hvac.api.auth.mfa` class.
-
-        :return: This Client instance's associated MFA instance.
-        :rtype: hvac.api.auth.mfa
-        """
-        return self._mfa
-
-    @property
-    def kv(self):
-        """Accessor for the Client instance's KV methods. Provided via the :py:class:`hvac.api.secrets_engines.Kv` class.
-
-        :return: This Client instance's associated Kv instance.
-        :rtype: hvac.api.secrets_engines.Kv
-        """
-        return self._kv
-
-    @property
-    def azure(self):
-        """Accessor for the Client instance's Azure methods. Provided via the :py:class:`hvac.api.Azure` class.
-
-        :return: This Client instance's associated Azure instance.
-        :rtype: hvac.api.Azure
-        """
-        return self._azure
+        return self._secrets
 
     def read(self, path, wrap_ttl=None):
         """GET /<path>
@@ -1126,7 +1090,7 @@ class Client(object):
             'user_id': user_id,
         }
 
-        return self.auth('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
+        return self.login('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
 
     def auth_tls(self, mount_point='cert', use_token=True):
         """POST /auth/<mount point>/login
@@ -1138,7 +1102,7 @@ class Client(object):
         :return:
         :rtype:
         """
-        return self.auth('/v1/auth/{0}/login'.format(mount_point), use_token=use_token)
+        return self.login('/v1/auth/{0}/login'.format(mount_point), use_token=use_token)
 
     def auth_userpass(self, username, password, mount_point='userpass', use_token=True, **kwargs):
         """POST /auth/<mount point>/login/<username>
@@ -1162,7 +1126,7 @@ class Client(object):
 
         params.update(kwargs)
 
-        return self.auth('/v1/auth/{0}/login/{1}'.format(mount_point, username), json=params, use_token=use_token)
+        return self.login('/v1/auth/{0}/login/{1}'.format(mount_point, username), json=params, use_token=use_token)
 
     def auth_aws_iam(self, access_key, secret_key, session_token=None, header_value=None, mount_point='aws', role='', use_token=True, region='us-east-1'):
         """POST /auth/<mount point>/login
@@ -1207,7 +1171,7 @@ class Client(object):
             'role': role,
         }
 
-        return self.auth('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
+        return self.login('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
 
     def auth_ec2(self, pkcs7, nonce=None, role=None, use_token=True, mount_point='aws-ec2'):
         """POST /auth/<mount point>/login
@@ -1235,7 +1199,7 @@ class Client(object):
         if role:
             params['role'] = role
 
-        return self.auth('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
+        return self.login('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
 
     def create_userpass(self, username, password, policies, mount_point='userpass', **kwargs):
         """POST /auth/<mount point>/users/<username>
@@ -1738,9 +1702,9 @@ class Client(object):
         :rtype:
         """
         self.token = token
-        return self.auth('/v1/sys/wrapping/unwrap')
+        return self.login('/v1/sys/wrapping/unwrap')
 
-    def auth(self, url, use_token=True, **kwargs):
+    def login(self, url, use_token=True, **kwargs):
         """Performs a request (typically to a path prefixed with "/v1/auth") and optionaly stores the client token sent
             in the resulting Vault response for use by the :py:meth:`hvac.adapters.Adapter` instance under the _adapater
             Client attribute.
@@ -1755,7 +1719,7 @@ class Client(object):
         :return: The response of the auth request.
         :rtype: requests.Response
         """
-        return self._adapter.auth(
+        return self._adapter.login(
             url=url,
             use_token=use_token,
             **kwargs
@@ -2105,7 +2069,7 @@ class Client(object):
         if secret_id is not None:
             params['secret_id'] = secret_id
 
-        return self.auth('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
+        return self.login('/v1/auth/{0}/login'.format(mount_point), json=params, use_token=use_token)
 
     def create_kubernetes_configuration(self, kubernetes_host, kubernetes_ca_cert=None, token_reviewer_jwt=None, pem_keys=None, mount_point='kubernetes'):
         """POST /auth/<mount_point>/config
@@ -2253,7 +2217,7 @@ class Client(object):
             'jwt': jwt
         }
         url = 'v1/auth/{0}/login'.format(mount_point)
-        return self.auth(url, json=params, use_token=use_token)
+        return self.login(url, json=params, use_token=use_token)
 
     def transit_create_key(self, name, convergent_encryption=None, derived=None, exportable=None,
                            key_type=None, mount_point='transit'):
@@ -2694,21 +2658,21 @@ class Client(object):
         new_method=api.auth_methods.Ldap.login,
     )
     def auth_ldap(self, *args, **kwargs):
-        return self.ldap.login(*args, **kwargs)
+        return self.auth.ldap.login(*args, **kwargs)
 
     @utils.deprecated_method(
         to_be_removed_in_version='0.8.0',
         new_method=api.auth_methods.Github.login,
     )
     def auth_gcp(self, *args, **kwargs):
-        return self.gcp.auth.login(*args, **kwargs)
+        return self.auth.gcp.login(*args, **kwargs)
 
     @utils.deprecated_method(
         to_be_removed_in_version='0.8.0',
         new_method=api.auth_methods.Github.login,
     )
     def auth_github(self, *args, **kwargs):
-        return self.github.login(*args, **kwargs)
+        return self.auth.github.login(*args, **kwargs)
 
     @utils.deprecated_method(
         to_be_removed_in_version='0.8.0',
