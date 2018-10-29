@@ -5,7 +5,6 @@ Misc utility functions and constants
 import functools
 import inspect
 import warnings
-import sys
 from textwrap import dedent
 
 from hvac import exceptions
@@ -47,69 +46,88 @@ def raise_for_error(status_code, message=None, errors=None):
 
 
 def generate_method_deprecation_message(to_be_removed_in_version, old_method_name, method_name=None, module_name=None):
-        message = "Call to deprecated function '{old_method_name}'. This method will be removed in version '{version}'".format(
-            old_method_name=old_method_name,
-            version=to_be_removed_in_version,
-        )
-        if method_name is not None and module_name is not None:
-            message += " Please use the '{method_name}' method on the '{module_name}' class moving forward.".format(
-                method_name=method_name,
-                module_name=module_name,
-            )
-        return message
+    """Generate a message to be used when warning about the use of deprecated methods.
 
-
-def generate_property_deprecation_message(to_be_removed_in_version, old_name, new_name, new_property):
-        message = "Call to deprecated property '{name}'. This property will be removed in version '{version}'".format(
-            name=old_name,
-            version=to_be_removed_in_version,
-        )
-        message += " Please use the '{new_name}' property on the 'Client.{new_property}' attribute moving forward.".format(
-            new_name=new_name,
-            new_property=new_property,
-        )
-        return message
-
-
-def display_deprecation_warning(message):
-
-    warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-
-    warnings.warn(
-        message=message,
-        category=DeprecationWarning,
-        stacklevel=2,
+    :param to_be_removed_in_version: Version of this module the deprecated method will be removed in.
+    :type to_be_removed_in_version: str
+    :param old_method_name: Deprecated method name.
+    :type old_method_name:  str
+    :param method_name:  Method intended to replace the deprecated method indicated. This method's docstrings are
+        included in the decorated method's docstring.
+    :type method_name: str
+    :param module_name: Name of the module containing the new method to use.
+    :type module_name: str
+    :return: Full deprecation warning message for the indicated method.
+    :rtype: str
+    """
+    message = "Call to deprecated function '{old_method_name}'. This method will be removed in version '{version}'".format(
+        old_method_name=old_method_name,
+        version=to_be_removed_in_version,
     )
-    warnings.simplefilter('default', DeprecationWarning)  # reset filter
+    if method_name is not None and module_name is not None:
+        message += " Please use the '{method_name}' method on the '{module_name}' class moving forward.".format(
+            method_name=method_name,
+            module_name=module_name,
+        )
+    return message
+
+
+def generate_property_deprecation_message(to_be_removed_in_version, old_name, new_name, new_attribute,
+                                          module_name='Client'):
+    """Generate a message to be used when warning about the use of deprecated properties.
+
+    :param to_be_removed_in_version: Version of this module the deprecated property will be removed in.
+    :type to_be_removed_in_version: str
+    :param old_name: Deprecated property name.
+    :type old_name: str
+    :param new_name: Name of the new property name to use.
+    :type new_name: str
+    :param new_attribute: The new attribute where the new property can be found.
+    :type new_attribute: str
+    :param module_name: Name of the module containing the new method to use.
+    :type module_name: str
+    :return: Full deprecation warning message for the indicated property.
+    :rtype: str
+    """
+    message = "Call to deprecated property '{name}'. This property will be removed in version '{version}'".format(
+        name=old_name,
+        version=to_be_removed_in_version,
+    )
+    message += " Please use the '{new_name}' property on the '{module_name}.{new_attribute}' attribute moving forward.".format(
+        new_name=new_name,
+        module_name=module_name,
+        new_attribute=new_attribute,
+    )
+    return message
 
 
 def getattr_with_deprecated_properties(obj, item, deprecated_properties):
-    """
+    """Helper method to use in the getattr method of a class with deprecated properties.
 
-    :param obj:
-    :type obj:
-    :param item:
-    :type item:
-    :param deprecated_properties:
-    :type deprecated_properties:
-    :return:
-    :rtype:
+    :param obj: Instance of the Class containing the deprecated properties in question.
+    :type obj: object
+    :param item: Name of the attribute being requested.
+    :type item: str
+    :param deprecated_properties: List of deprecated properties. Each item in the list is a dict with at least a
+        "to_be_removed_in_version" and "client_property" key to be used in the displayed deprecation warning.
+    :type deprecated_properties: List[dict]
+    :return: The new property indicated where available.
+    :rtype: object
     """
     if item in deprecated_properties:
         deprecation_message = generate_property_deprecation_message(
             to_be_removed_in_version=deprecated_properties[item]['to_be_removed_in_version'],
             old_name=item,
             new_name=deprecated_properties[item].get('new_property', item),
-            new_property=deprecated_properties[item]['client_property'],
+            new_attribute=deprecated_properties[item]['client_property'],
         )
-        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-
+        warnings.simplefilter('always', DeprecationWarning)
         warnings.warn(
             message=deprecation_message,
             category=DeprecationWarning,
             stacklevel=2,
         )
-        warnings.simplefilter('default', DeprecationWarning)  # reset filter
+        warnings.simplefilter('default', DeprecationWarning)
         client_property = getattr(obj, deprecated_properties[item]['client_property'])
         return getattr(client_property, deprecated_properties[item].get('new_property', item))
 
@@ -139,7 +157,6 @@ def deprecated_method(to_be_removed_in_version, new_method=None):
         @functools.wraps(method)
         def new_func(*args, **kwargs):
             warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-
             warnings.warn(
                 message=deprecation_message,
                 category=DeprecationWarning,
@@ -196,7 +213,3 @@ def list_to_comma_delimited(list_param):
     if list_param is None:
         list_param = []
     return ','.join(list_param)
-
-
-def class_from_str(class_name):
-    return getattr(sys.modules[__name__], class_name)
