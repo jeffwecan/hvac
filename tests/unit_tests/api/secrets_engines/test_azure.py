@@ -27,7 +27,7 @@ class TestAzure(TestCase):
                 },
             ]
 
-        mock_url = 'http://localhost:8200/v1/{mount_point}/roles/{name}'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles/{name}'.format(
             mount_point=DEFAULT_MOUNT_POINT,
             name=role_name,
         )
@@ -63,7 +63,7 @@ class TestAzure(TestCase):
             },
         }
 
-        mock_url = 'http://localhost:8200/v1/{mount_point}/roles'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles'.format(
             mount_point=DEFAULT_MOUNT_POINT,
         )
         requests_mocker.register_uri(
@@ -97,7 +97,7 @@ class TestAzure(TestCase):
             },
         }
 
-        mock_url = 'http://localhost:8200/v1/{mount_point}/creds/{name}'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/creds/{name}'.format(
             mount_point=DEFAULT_MOUNT_POINT,
             name=role_name,
         )

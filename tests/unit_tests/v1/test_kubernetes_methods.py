@@ -16,7 +16,7 @@ class TestKubernetesMethods(TestCase):
     @requests_mock.Mocker()
     def test_create_kubernetes_configuration(self, test_label, mount_point, kubernetes_host, pem_keys, requests_mocker):
         expected_status_code = 204
-        mock_url = 'http://localhost:8200/v1/auth/{0}/config'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{0}/config'.format(
             'kubernetes' if mount_point is None else mount_point,
         )
         requests_mocker.register_uri(
@@ -62,7 +62,7 @@ class TestKubernetesMethods(TestCase):
             'warnings': None,
             'wrap_info': None
         }
-        mock_url = 'http://localhost:8200/v1/auth/{0}/config'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{0}/config'.format(
             'kubernetes' if mount_point is None else mount_point,
         )
         requests_mocker.register_uri(
@@ -91,7 +91,7 @@ class TestKubernetesMethods(TestCase):
     @requests_mock.Mocker()
     def test_create_role(self, test_label, mount_point, role_name, bound_service_account_names, bound_service_account_namespaces, requests_mocker):
         expected_status_code = 204
-        mock_url = 'http://localhost:8200/v1/auth/{0}/role/{1}'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{0}/role/{1}'.format(
             'kubernetes' if mount_point is None else mount_point,
             role_name,
         )
@@ -145,7 +145,7 @@ class TestKubernetesMethods(TestCase):
             "warnings": None,
             "wrap_info": None
         }
-        mock_url = 'http://localhost:8200/v1/auth/{0}/role/{1}'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{0}/role/{1}'.format(
             'kubernetes' if mount_point is None else mount_point,
             role_name,
         )
@@ -189,7 +189,7 @@ class TestKubernetesMethods(TestCase):
             "warnings": None,
             "wrap_info": None
         }
-        mock_url = 'http://localhost:8200/v1/auth/{0}/role?list=true'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{0}/role?list=true'.format(
             'kubernetes' if mount_point is None else mount_point,
         )
         requests_mocker.register_uri(
@@ -215,7 +215,7 @@ class TestKubernetesMethods(TestCase):
     @requests_mock.Mocker()
     def test_delete_kubernetes_role(self, test_label, mount_point, role_name, requests_mocker):
         expected_status_code = 204
-        mock_url = 'http://localhost:8200/v1/auth/{0}/role/{1}'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{0}/role/{1}'.format(
             'kubernetes' if mount_point is None else mount_point,
             role_name,
         )
@@ -271,7 +271,7 @@ class TestKubernetesMethods(TestCase):
             'warnings': [],
             'wrap_info': None
         }
-        mock_url = 'http://localhost:8200/v1/auth/{0}/login'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{0}/login'.format(
                 'kubernetes' if mount_point is None else mount_point)
         requests_mocker.register_uri(
             method='POST',

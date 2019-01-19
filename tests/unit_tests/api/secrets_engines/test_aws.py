@@ -26,7 +26,7 @@ class TestAws(TestCase):
           }
         }
         aws = Aws(adapter=Request())
-        mock_url = 'http://localhost:8200/v1/{mount_point}/config/rotate-root'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/config/rotate-root'.format(
             mount_point=mount_point,
         )
         logging.debug('Mocking URL: %s' % mock_url)
@@ -67,7 +67,7 @@ class TestAws(TestCase):
             "security_token": None
           }
         }
-        mock_url = 'http://localhost:8200/v1/{mount_point}/creds/{role_name}'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/creds/{role_name}'.format(
             mount_point=mount_point,
             role_name=role_name,
         )

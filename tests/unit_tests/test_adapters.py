@@ -15,7 +15,7 @@ class TestRequest(TestCase):
     @parameterized.expand([
         param(
             "standard Vault address",
-            url='https://localhost:8200',
+            url='https://127.0.0.1:8200',
         ),
         param(
             "Vault address with route",
@@ -23,12 +23,12 @@ class TestRequest(TestCase):
         ),
         param(
             "regression test for hvac issue #51",
-            url='https://localhost:8200',
+            url='https://127.0.0.1:8200',
             path='keyring/http://some.url/sub/entry',
         ),
         param(
             "redirect with location header for issue #343",
-            url='https://localhost:8200',
+            url='https://127.0.0.1:8200',
             path='secret/some-secret',
             redirect_url='https://some-other-place.com/secret/some-secret',
 
