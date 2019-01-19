@@ -13,7 +13,7 @@ from hvac import utils
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_BASE_URI = 'http://localhost:8200'
+DEFAULT_BASE_URI = 'https://127.0.0.1:8200'
 
 
 class Adapter(object):

@@ -14,7 +14,7 @@ class TestSystemBackendMethods(TestCase):
     ])
     @requests_mock.Mocker()
     def test_read_lease(self, test_label, test_lease_id, requests_mocker):
-        test_path = 'http://localhost:8200/v1/sys/leases/lookup'
+        test_path = 'https://127.0.0.1:8200/v1/sys/leases/lookup'
         mock_response = {
             'issue_time': '2018-07-15T08:35:34.775859245-05:00',
             'renewable': False,

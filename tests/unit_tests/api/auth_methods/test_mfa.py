@@ -17,7 +17,7 @@ class TestMfa(TestCase):
     @requests_mock.Mocker()
     def test_configure(self, test_label, mount_point, requests_mocker):
         expected_status_code = 204
-        mock_url = 'http://localhost:8200/v1/auth/{mount_point}/mfa_config'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{mount_point}/mfa_config'.format(
             mount_point=mount_point,
         )
         requests_mocker.register_uri(
@@ -52,7 +52,7 @@ class TestMfa(TestCase):
             'renewable': False
         }
 
-        mock_url = 'http://localhost:8200/v1/auth/{mount_point}/mfa_config'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{mount_point}/mfa_config'.format(
             mount_point=mount_point,
         )
         requests_mocker.register_uri(
@@ -77,7 +77,7 @@ class TestMfa(TestCase):
     @requests_mock.Mocker()
     def test_configure_duo_access(self, test_label, mount_point, requests_mocker):
         expected_status_code = 204
-        mock_url = 'http://localhost:8200/v1/auth/{mount_point}/duo/access'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{mount_point}/duo/access'.format(
             mount_point=mount_point,
         )
         requests_mocker.register_uri(
@@ -104,7 +104,7 @@ class TestMfa(TestCase):
     @requests_mock.Mocker()
     def test_configure_duo_behavior(self, test_label, mount_point, requests_mocker):
         expected_status_code = 204
-        mock_url = 'http://localhost:8200/v1/auth/{mount_point}/duo/config'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{mount_point}/duo/config'.format(
             mount_point=mount_point,
         )
         requests_mocker.register_uri(
@@ -144,7 +144,7 @@ class TestMfa(TestCase):
             'renewable': False
         }
 
-        mock_url = 'http://localhost:8200/v1/auth/{mount_point}/duo/config'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{mount_point}/duo/config'.format(
             mount_point=mount_point,
         )
         requests_mocker.register_uri(

@@ -21,7 +21,7 @@ class TestOkta(TestCase):
             "default",
         ]
         expected_status_code = 200
-        mock_url = 'http://localhost:8200/v1/auth/{mount_point}/login/{username}'.format(
+        mock_url = 'https://127.0.0.1:8200/v1/auth/{mount_point}/login/{username}'.format(
             mount_point=self.TEST_MOUNT_POINT,
             username=self.TEST_USERNAME,
         )

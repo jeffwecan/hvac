@@ -16,7 +16,7 @@ except ImportError:
 class Client(object):
     """The hvac Client class for HashiCorp's Vault."""
 
-    def __init__(self, url='https://localhost:8200', token=None,
+    def __init__(self, url='https://127.0.0.1:8200', token=None,
                  cert=None, verify=True, timeout=30, proxies=None,
                  allow_redirects=True, session=None, adapter=None, namespace=None):
         """Creates a new hvac client instance.
