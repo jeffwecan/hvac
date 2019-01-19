@@ -60,7 +60,7 @@ def get_generate_root_otp():
     return test_otp
 
 
-def create_client(url='https://127.0.0.1:8200', **kwargs):
+def create_client(url='https://localhost:8200', **kwargs):
     """Small helper to instantiate a :py:class:`hvac.v1.Client` class with the appropriate parameters for the test env.
 
     :param url: Vault address to configure the client with.
