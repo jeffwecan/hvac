@@ -7,6 +7,13 @@ GCP
    :local:
    :depth: 1
 
+.. testsetup:: gcp-auth, gcp-auth-google-api-python-client
+
+    client = hvac.Client(url='https://127.0.0.1:8200')
+    client.sys.enable_auth_method(
+        method_type='gcp'
+    )
+
 
 Configure
 ---------
@@ -16,12 +23,6 @@ Configure
 
 Examples
 ````````
-.. testsetup:: gcp-auth
-
-    client = hvac.Client(url='https://127.0.0.1:8200')
-    client.sys.enable_auth_method(
-        method_type='gcp'
-    )
 
 .. testcode:: gcp-auth
 
@@ -241,12 +242,33 @@ Basic Example
 google-api-python-client Example
 ````````````````````````````````
 
-.. code:: python
+.. testsetup:: gcp-auth-google-api-python-client
+
+    from mock import patch, Mock
+
+    gcp_build_patcher = patch('googleapiclient.discovery.build')
+
+    mock_sign_jwt_request = Mock(name='mock_sign_jwt_request')
+    mock_sign_jwt_request.execute.return_value = dict(signedJwt='some signed jwt')
+
+    mock_projects_service_accounts = Mock(name='mock_projects_service_accounts')
+    mock_projects_service_accounts.signJwt.return_value = mock_sign_jwt_request
+
+    mock_projects = Mock(name='mock_projects')
+    mock_projects.serviceAccounts.return_value = mock_projects_service_accounts
+
+    mock_iam_service = Mock(name='mock_iam_service')
+    mock_iam_service.projects.return_value = mock_projects
+
+    gcp_build_mock = gcp_build_patcher.start()
+    gcp_build_mock.return_value = mock_iam_service
+
+.. testcode:: gcp-auth-google-api-python-client
 
     import json
     import time
 
-    from googleapiclient import discovery # pip install google-api-python-client
+    from googleapiclient.discovery import build # pip install google-api-python-client
     from google.oauth2 import service_account # pip install google-auth
     import hvac # pip install hvac
 
@@ -272,13 +294,13 @@ google-api-python-client Example
     name = f'projects/{project}/serviceAccounts/{service_account}'
 
     # Perform the GCP API call
-    iam = discovery.build('iam', 'v1', credentials=credentials)
+    iam = build('iam', 'v1', credentials=credentials)
     request = iam.projects().serviceAccounts().signJwt(name=name, body=body)
     resp = request.execute()
     jwt = resp['signedJwt']
 
     # Perform hvac call to configured GCP auth method
     client.auth.gcp.login(
-        role='my-role',
+        role='some-iam-role-name',
         jwt=jwt,
     )
