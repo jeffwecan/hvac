@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+from datetime import datetime, timedelta
 
 from requests_mock.mocker import Mocker
-from datetime import datetime, timedelta
+
 from tests import utils as test_utils
 from tests.utils.mock_ldap_server import MockLdapServer
 from tests.utils.server_manager import ServerManager
-from mock import patch, MagicMock
 
 
 def doctest_global_setup():
@@ -183,18 +183,6 @@ def doctest_global_setup():
     )
 
 
-
-    # mock_url = 'http://localhost:8200/v1/{mount_point}/roles/{name}'.format(
-    #     mount_point=DEFAULT_MOUNT_POINT,
-    #     name=role_name,
-    # )
-    # requests_mocker.register_uri(
-    #     method='POST',
-    #     url=mock_url,
-    #     status_code=expected_status_code,
-    #     # json=mock_response,
-    # )
-
     client.token = manager.root_token
     os.environ['VAULT_TOKEN'] = manager.root_token
     os.environ['REQUESTS_CA_BUNDLE'] = test_utils.get_config_file_path('server-cert.pem')
@@ -211,11 +199,5 @@ def doctest_global_setup():
 
     with open(test_utils.get_config_file_path('example.jwt.json')) as fp:
         os.environ.setdefault('GCP_JWT_CREDENTIALS', fp.read())
-
-    # GCP specific?
-    # gcp_discovery_patcher = patch('googleapiclient.discovery')
-    # gcp_discovery_mock = gcp_discovery_patcher.start()
-    # mock_iam_service = MagicMock()
-    # gcp_discovery_mock.build.return_value = mock_iam_service
 
     return manager
