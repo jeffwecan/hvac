@@ -8,9 +8,16 @@ LDAP
 
 .. testsetup:: ldap
 
+    from tests.doctest import mock_login_response
     from tests.utils.mock_ldap_server import MockLdapServer
+
     ldap_server = MockLdapServer()
     ldap_server.start()
+
+    mock_login_response(
+        path='ldap/login/{}'.format(MockLdapServer.ldap_user_name),
+        client_token=manager.root_token,
+    )
     client.sys.enable_auth_method(
         method_type='ldap',
     )

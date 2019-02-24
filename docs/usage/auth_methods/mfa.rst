@@ -13,28 +13,9 @@ MFA
 
 .. testsetup:: mfa
 
-    test_userpass_password = 'some password'
+    from tests.doctest import mfa_auth_test_setup
 
-    from mock import patch
-    getpass_patcher = patch('getpass.getpass')
-    mock_getpass = getpass_patcher.start()
-    mock_getpass.return_value = test_userpass_password
-
-    userpass_auth_path = 'some-userpass'
-    # Reset state of our test userpass auth method under path: some-userpass
-    client.sys.disable_auth_method(
-        path=userpass_auth_path,
-    )
-    client.sys.enable_auth_method(
-        method_type='userpass',
-        path=userpass_auth_path,
-    )
-    client.create_userpass(
-        username='someuser',
-        password=test_userpass_password,
-        policies=['default'],
-        mount_point=userpass_auth_path,
-    )
+    mfa_auth_test_setup(client=client)
 
 Configure
 ---------
@@ -197,3 +178,4 @@ Example output:
         path=userpass_auth_path,
     )
     getpass_patcher.stop()
+    mocker.stop()

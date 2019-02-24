@@ -5,6 +5,14 @@ Kubernetes
    :local:
    :depth: 1
 
+.. testsetup:: k8s
+
+    from tests.doctest import mock_login_response
+    mock_login_response(
+        path='kubernetes/login',
+        client_token=manager.root_token,
+    )
+
 Authentication
 --------------
 

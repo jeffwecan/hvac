@@ -9,10 +9,21 @@ GCP
 
 .. testsetup:: gcp-auth, gcp-auth-google-api-python-client
 
-    client = hvac.Client(url='https://127.0.0.1:8200')
+    import os
+    from tests import utils as test_utils
+    from tests.doctest import mock_login_response
+    mock_login_response(
+        path='gcp/login',
+        client_token=manager.root_token,
+    )
     client.sys.enable_auth_method(
         method_type='gcp'
     )
+
+    os.environ.setdefault("GCP_SERVICE_ACCOUNT_JSON_PATH", test_utils.get_config_file_path('example.jwt.json'))
+    with open(test_utils.get_config_file_path('example.jwt.json')) as fp:
+        os.environ.setdefault('GCP_JWT_CREDENTIALS', fp.read())
+
 
 
 Configure

@@ -5,6 +5,12 @@ AWS
    :local:
    :depth: 1
 
+.. testsetup:: aws_iam, aws_ec2
+
+    from tests.doctest import aws_auth_test_setup
+
+    aws_auth_test_setup(token=manager.root_token)
+
 Configuration
 -------------
 

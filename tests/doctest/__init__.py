@@ -6,58 +6,78 @@ from datetime import datetime, timedelta
 from requests_mock.mocker import Mocker
 
 from tests import utils as test_utils
-from tests.utils.mock_ldap_server import MockLdapServer
 from tests.utils.server_manager import ServerManager
 
 
-def doctest_global_setup():
-    client = test_utils.create_client()
-    manager = ServerManager(
-        config_paths=[test_utils.get_config_file_path('vault-doctest.hcl')],
-        client=client,
-    )
-    manager.start()
-    manager.initialize()
-    manager.unseal()
-
+def mock_login_response(path, client_token):
     mocker = Mocker(real_http=True)
     mocker.start()
+    mock_url = 'https://127.0.0.1:8200/v1/auth/{path}'.format(path=path)
     mock_response = {
-            'auth': {
-                'accessor': 'accessor-1234-5678-9012-345678901234',
-                'client_token': manager.root_token,
-                'lease_duration': 10000,
-                'metadata': {
-                    'role': 'custom_role',
-                    'service_account_email': 'dev1@project-123456.iam.gserviceaccount.com',
-                    'service_account_id': '111111111111111111111'
-                },
-                'policies': [
-                    'default',
-                    'custom_role'
-                ],
-                'renewable': True
-            },
-            'data': None,
-            'lease_duration': 0,
-            'lease_id': '',
-            'renewable': False,
-            'request_id': 'requesti-1234-5678-9012-345678901234',
-            'warnings': [],
-            'wrap_info': None
-        }
-    mock_url = 'https://127.0.0.1:8200/v1/auth/aws/login'
+        "auth": {
+            "client_token": client_token,
+            "accessor": "0e9e354a-520f-df04-6867-ee81cae3d42d",
+            "policies": ['default'],
+            "lease_duration": 2764800,
+            "renewable": True,
+        },
+    }
     mocker.register_uri(
         method='POST',
         url=mock_url,
-        json=mock_response
+        json=mock_response,
     )
 
+
+def mfa_auth_test_setup(client):
+    mock_login_response(
+        path='some-userpass/login/someuser',
+        client_token=client.token,
+    )
+
+    mocker = Mocker(real_http=True)
+    mocker.start()
+
+    mock_url = 'https://127.0.0.1:8200/v1/auth/{mount_point}/duo/access'.format(
+        mount_point='some-userpass',
+    )
+    mocker.register_uri(
+        method='POST',
+        url=mock_url,
+    )
+
+    test_userpass_password = 'some password'
+
+    from mock import patch
+    getpass_patcher = patch('getpass.getpass')
+    mock_getpass = getpass_patcher.start()
+    mock_getpass.return_value = test_userpass_password
+
+    userpass_auth_path = 'some-userpass'
+    # Reset state of our test userpass auth method under path: some-userpass
+    client.sys.disable_auth_method(
+        path=userpass_auth_path,
+    )
+    client.sys.enable_auth_method(
+        method_type='userpass',
+        path=userpass_auth_path,
+    )
+    client.create_userpass(
+        username='someuser',
+        password=test_userpass_password,
+        policies=['default'],
+        mount_point=userpass_auth_path,
+    )
+
+
+def aws_auth_test_setup(token):
+
+    mocker = Mocker(real_http=True)
+    mocker.start()
     utc_timestamp = datetime.utcnow()
     datetime_format = '%Y-%m-%dT%H:%M:%SZ%z'
     last_updated = utc_timestamp - timedelta(hours=4)
     expiration = utc_timestamp + timedelta(hours=4)
-
     mock_response = {
         "Code": "Success",
         "LastUpdated": last_updated.strftime(datetime_format),
@@ -79,40 +99,6 @@ def doctest_global_setup():
         method='GET',
         url=mock_url,
         json=mock_response
-    )
-    auth_method_paths = [
-        'azure/login',
-        'kubernetes/login',
-        'gcp/login',
-        'github/login',
-        'ldap/login/{}'.format(MockLdapServer.ldap_user_name),
-        'some-userpass/login/someuser',  # For MFA docs
-        'okta/login',
-        'okta/login/hvac-person',
-    ]
-    for auth_method_path in auth_method_paths:
-        mock_url = 'https://127.0.0.1:8200/v1/auth/{path}'.format(path=auth_method_path)
-        mock_response = {
-            "auth": {
-                "client_token": manager.root_token,
-                "accessor": "0e9e354a-520f-df04-6867-ee81cae3d42d",
-                "policies": ['default'],
-                "lease_duration": 2764800,
-                "renewable": True,
-            },
-        }
-        mocker.register_uri(
-            method='POST',
-            url=mock_url,
-            json=mock_response,
-        )
-
-    mock_url = 'https://127.0.0.1:8200/v1/auth/{mount_point}/duo/access'.format(
-        mount_point='some-userpass',
-    )
-    mocker.register_uri(
-        method='POST',
-        url=mock_url,
     )
 
     mock_response = {
@@ -144,60 +130,30 @@ def doctest_global_setup():
         url=mock_url,
         json=mock_response,
     )
+    mock_login_response(
+        path='aws/login',
+        client_token=token,
+    )
+    os.environ.setdefault("AWS_ACCESS_KEY_ID", "foobar_key")
+    os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "foobar_secret")
+    os.environ.setdefault('AWS_LAMBDA_FUNCTION_NAME', 'hvac-lambda')
+    os.environ.setdefault("VAULT_HEADER_VALUE", "some_header_value")
 
-    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles/{name}'.format(
-        mount_point='azure',
-        name='hvac',
-    )
-    mocker.register_uri(
-        method='POST',
-        url=mock_url,
-    )
-    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles'.format(
-        mount_point='azure',
-    )
-    mock_response = {
-        'data': {
-            'keys': ['hvac'],
-        },
-    }
-    mocker.register_uri(
-        method='LIST',
-        url=mock_url,
-        json=mock_response,
-    )
-    mock_response = {
-        'data': {
-            'client_id': 'some_client_id',
-            'client_secret': 'some_client_secret',
-        },
-    }
-    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/creds/{name}'.format(
-        mount_point='azure',
-        name='hvac',
-    )
-    mocker.register_uri(
-        method='GET',
-        url=mock_url,
-        json=mock_response,
-    )
 
+
+def doctest_global_setup():
+    client = test_utils.create_client()
+    manager = ServerManager(
+        config_paths=[test_utils.get_config_file_path('vault-doctest.hcl')],
+        client=client,
+    )
+    manager.start()
+    manager.initialize()
+    manager.unseal()
 
     client.token = manager.root_token
     os.environ['VAULT_TOKEN'] = manager.root_token
     os.environ['REQUESTS_CA_BUNDLE'] = test_utils.get_config_file_path('server-cert.pem')
-    os.environ['LDAP_USERNAME'] = MockLdapServer.ldap_user_name
-    os.environ['LDAP_PASSWORD'] = MockLdapServer.ldap_user_password
-    os.environ['AWS_LAMBDA_FUNCTION_NAME'] = 'hvac-lambda'
-    # "Mock" the AWS credentials as they can't be mocked in Botocore currently
-    os.environ.setdefault("AWS_ACCESS_KEY_ID", "foobar_key")
-    os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "foobar_secret")
     os.environ.setdefault("VAULT_ADDR", "https://127.0.0.1:8200")
-    os.environ.setdefault("VAULT_HEADER_VALUE", "some_header_value")
-    os.environ.setdefault("GCP_SERVICE_ACCOUNT_JSON_PATH", test_utils.get_config_file_path('example.jwt.json'))
-    os.environ.setdefault("LDAP_PASSWORD", MockLdapServer.ldap_user_password)
-
-    with open(test_utils.get_config_file_path('example.jwt.json')) as fp:
-        os.environ.setdefault('GCP_JWT_CREDENTIALS', fp.read())
 
     return manager

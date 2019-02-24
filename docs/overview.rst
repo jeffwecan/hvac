@@ -186,6 +186,7 @@ LDAP Authentication Example
 
 .. testsetup:: ldap
 
+    import os
     from tests.utils.mock_ldap_server import MockLdapServer
     ldap_server = MockLdapServer()
     ldap_server.start()
@@ -207,6 +208,8 @@ LDAP Authentication Example
         policies=['default'],
     )
     client.token = None
+    os.environ.setdefault("LDAP_USERNAME", MockLdapServer.ldap_user_name)
+    os.environ.setdefault("LDAP_PASSWORD", MockLdapServer.ldap_user_password)
 
 .. doctest:: ldap
 

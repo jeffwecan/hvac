@@ -7,8 +7,62 @@ Azure
    :local:
    :depth: 1
 
-.. note::
-    Every method under the :py:attr:`Client class's azure attribute<hvac.v1.Client.azure.auth>` includes a `mount_point` parameter that can be used to address the Azure auth method under a custom mount path. E.g., If enabling the Azure auth method using Vault's CLI commands via `vault auth enable -path=my-azure azure`", the `mount_point` parameter in :py:meth:`hvac.api.auth_methods.Azure` methods would be set to "my-azure".
+.. testsetup:: azure
+
+
+    import os
+    from requests_mock.mocker import Mocker
+    from tests.doctest import mock_login_response
+    mock_login_response(
+        path='azure/login',
+        client_token=manager.root_token,
+    )
+
+
+    mocker = Mocker(real_http=True)
+    mocker.start()
+
+    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles/{name}'.format(
+        mount_point='azure',
+        name='hvac',
+    )
+    mocker.register_uri(
+        method='POST',
+        url=mock_url,
+    )
+    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles'.format(
+        mount_point='azure',
+    )
+    mock_response = {
+        'data': {
+            'keys': ['hvac'],
+        },
+    }
+    mocker.register_uri(
+        method='LIST',
+        url=mock_url,
+        json=mock_response,
+    )
+    mock_response = {
+        'data': {
+            'client_id': 'some_client_id',
+            'client_secret': 'some_client_secret',
+        },
+    }
+    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/creds/{name}'.format(
+        mount_point='azure',
+        name='hvac',
+    )
+    mocker.register_uri(
+        method='GET',
+        url=mock_url,
+        json=mock_response,
+    )
+
+
+    # "Mock" the AWS credentials as they can't be mocked in Botocore currently
+    os.environ.setdefault("AWS_ACCESS_KEY_ID", "foobar_key")
+    os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "foobar_secret")
 
 Enabling the Auth Method
 ------------------------

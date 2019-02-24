@@ -8,6 +8,13 @@ Okta
 
 .. testsetup:: okta
 
+    from tests.doctest import mock_login_response
+
+    mock_login_response(
+        path='okta/login/hvac-person',
+        client_token=manager.root_token,
+    )
+
     test_okta_password = 'some password'
 
     from mock import patch

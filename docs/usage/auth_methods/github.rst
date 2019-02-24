@@ -16,7 +16,11 @@ Examples
 
 .. testsetup:: github
 
-    client = hvac.Client(url='https://127.0.0.1:8200')
+    from tests.doctest import mock_login_response
+    mock_login_response(
+        path='github/login',
+        client_token=manager.root_token,
+    )
     client.sys.enable_auth_method(
         method_type='github'
     )

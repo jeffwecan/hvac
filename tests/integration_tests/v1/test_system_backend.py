@@ -5,6 +5,7 @@ from parameterized import parameterized, param
 
 from hvac import exceptions
 from tests import utils
+from tests.utils import configure_pki, disable_pki
 from tests.utils.hvac_integration_test_case import HvacIntegrationTestCase
 
 
@@ -359,7 +360,7 @@ class TestSystemBackend(HvacIntegrationTestCase, TestCase):
 
     def test_read_lease(self):
         # Set up a test pki backend and issue a cert against some role so we.
-        self.configure_pki()
+        configure_pki(client=self.client)
         pki_issue_response = self.client.write(
             path='pki/issue/my-role',
             common_name='test.hvac.com',
@@ -375,7 +376,7 @@ class TestSystemBackend(HvacIntegrationTestCase, TestCase):
         )
 
         # Reset integration test state.
-        self.disable_pki()
+        disable_pki(client=self.client)
 
     @parameterized.expand([
         param(
