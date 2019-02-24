@@ -9,9 +9,10 @@ from tests import utils as test_utils
 from tests.utils.server_manager import ServerManager
 
 
+mocker = Mocker(real_http=True)
+
+
 def mock_login_response(path, client_token):
-    mocker = Mocker(real_http=True)
-    mocker.start()
     mock_url = 'https://127.0.0.1:8200/v1/auth/{path}'.format(path=path)
     mock_response = {
         "auth": {
@@ -35,8 +36,8 @@ def mfa_auth_test_setup(client):
         client_token=client.token,
     )
 
-    mocker = Mocker(real_http=True)
-    mocker.start()
+    # mocker = Mocker(real_http=True)
+    #mocker.start()
 
     mock_url = 'https://127.0.0.1:8200/v1/auth/{mount_point}/duo/access'.format(
         mount_point='some-userpass',
@@ -70,10 +71,53 @@ def mfa_auth_test_setup(client):
     )
 
 
+def azure_auth_test_setup(token):
+    mock_login_response(
+        path='azure/login',
+        client_token=token,
+    )
+
+    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles/{name}'.format(
+        mount_point='azure',
+        name='hvac',
+    )
+    mocker.register_uri(
+        method='POST',
+        url=mock_url,
+    )
+    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles'.format(
+        mount_point='azure',
+    )
+    mock_response = {
+        'data': {
+            'keys': ['hvac'],
+        },
+    }
+    mocker.register_uri(
+        method='LIST',
+        url=mock_url,
+        json=mock_response,
+    )
+    mock_response = {
+        'data': {
+            'client_id': 'some_client_id',
+            'client_secret': 'some_client_secret',
+        },
+    }
+    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/creds/{name}'.format(
+        mount_point='azure',
+        name='hvac',
+    )
+    mocker.register_uri(
+        method='GET',
+        url=mock_url,
+        json=mock_response,
+    )
+    return mocker
+
 def aws_auth_test_setup(token):
 
-    mocker = Mocker(real_http=True)
-    mocker.start()
+    #mocker.start()
     utc_timestamp = datetime.utcnow()
     datetime_format = '%Y-%m-%dT%H:%M:%SZ%z'
     last_updated = utc_timestamp - timedelta(hours=4)
@@ -131,14 +175,17 @@ def aws_auth_test_setup(token):
         json=mock_response,
     )
     mock_login_response(
-        path='aws/login',
+        path='azure/login/my-role',
         client_token=token,
     )
+    os.environ['AWS_LAMBDA_FUNCTION_NAME'] = 'hvac-lambda'
+    # "Mock" the AWS credentials as they can't be mocked in Botocore currently
     os.environ.setdefault("AWS_ACCESS_KEY_ID", "foobar_key")
     os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "foobar_secret")
-    os.environ.setdefault('AWS_LAMBDA_FUNCTION_NAME', 'hvac-lambda')
+    os.environ.setdefault("VAULT_ADDR", "https://127.0.0.1:8200")
     os.environ.setdefault("VAULT_HEADER_VALUE", "some_header_value")
 
+    return mocker
 
 
 def doctest_global_setup():

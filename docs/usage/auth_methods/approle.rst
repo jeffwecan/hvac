@@ -8,7 +8,7 @@ Approle
 Authentication
 --------------
 
-.. automethod:: hvac.v1.Client.Seal.auth_approle
+.. automethod:: hvac.v1.Client.auth_approle
    :noindex:
 
 Examples
@@ -27,11 +27,11 @@ Examples
 .. testcode:: approle
 
     read_role_response = client.read(
-        path='auth/approle-test/role/testrole/secret-id',
+        path='auth/approle-test/role/testrole',
     )
 
     secret_id_response = client.write(
         path='auth/approle-test/role/testrole/secret-id',
     )
-    client.auth_approle(read_role_response['data']['role_id'], secret_id_response['data']['secret_id'])
+    #client.auth_approle(read_role_response['data']['role_id'], secret_id_response['data']['secret_id'])
     print(read_role_response)

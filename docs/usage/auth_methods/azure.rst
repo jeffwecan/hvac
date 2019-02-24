@@ -10,59 +10,12 @@ Azure
 .. testsetup:: azure
 
 
-    import os
-    from requests_mock.mocker import Mocker
-    from tests.doctest import mock_login_response
-    mock_login_response(
-        path='azure/login',
-        client_token=manager.root_token,
-    )
+
+    from tests.doctest import azure_auth_test_setup
+    azure_requests_mocker = azure_auth_test_setup(token=manager.root_token)
+    azure_requests_mocker.start()
 
 
-    mocker = Mocker(real_http=True)
-    mocker.start()
-
-    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles/{name}'.format(
-        mount_point='azure',
-        name='hvac',
-    )
-    mocker.register_uri(
-        method='POST',
-        url=mock_url,
-    )
-    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/roles'.format(
-        mount_point='azure',
-    )
-    mock_response = {
-        'data': {
-            'keys': ['hvac'],
-        },
-    }
-    mocker.register_uri(
-        method='LIST',
-        url=mock_url,
-        json=mock_response,
-    )
-    mock_response = {
-        'data': {
-            'client_id': 'some_client_id',
-            'client_secret': 'some_client_secret',
-        },
-    }
-    mock_url = 'https://127.0.0.1:8200/v1/{mount_point}/creds/{name}'.format(
-        mount_point='azure',
-        name='hvac',
-    )
-    mocker.register_uri(
-        method='GET',
-        url=mock_url,
-        json=mock_response,
-    )
-
-
-    # "Mock" the AWS credentials as they can't be mocked in Botocore currently
-    os.environ.setdefault("AWS_ACCESS_KEY_ID", "foobar_key")
-    os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "foobar_secret")
 
 Enabling the Auth Method
 ------------------------

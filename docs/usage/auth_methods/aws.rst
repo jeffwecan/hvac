@@ -5,11 +5,12 @@ AWS
    :local:
    :depth: 1
 
-.. testsetup:: aws_iam, aws_ec2
+.. testsetup:: aws_auth_config, aws_iam, aws_ec2
 
     from tests.doctest import aws_auth_test_setup
 
-    aws_auth_test_setup(token=manager.root_token)
+    aws_requests_mocker = aws_auth_test_setup(token=manager.root_token)
+    aws_requests_mocker.start()
 
 Configuration
 -------------
@@ -336,9 +337,10 @@ Authentication using EC2 instance role credentials and the EC2 metadata service
 
     assert vault_client.is_authenticated()
 
-.. testcleanup:: aws_ec2
+.. testcleanup:: aws_auth_config, aws_iam, aws_ec2
 
     os.environ['VAULT_TOKEN'] = manager.root_token
+    client.sys.disable_auth_method(path='aws')
 
 
 .. _hvac#251: https://github.com/hvac/hvac/issues/251
