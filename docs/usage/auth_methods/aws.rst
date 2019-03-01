@@ -5,12 +5,15 @@ AWS
    :local:
    :depth: 1
 
-.. testsetup:: aws_auth_config, aws_iam, aws_ec2
+.. testsetup:: aws_auth_config
 
     from tests.doctest import aws_auth_test_setup
+    aws_auth_test_setup(token=manager.root_token)
 
-    aws_requests_mocker = aws_auth_test_setup(token=manager.root_token)
-    aws_requests_mocker.start()
+.. testsetup:: aws_iam, aws_ec2
+
+    from tests.doctest import aws_auth_test_setup
+    aws_auth_test_setup(token=manager.root_token)
 
 Configuration
 -------------

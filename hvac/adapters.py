@@ -235,6 +235,7 @@ class Request(Adapter):
         :return: The response of the request.
         :rtype: requests.Response
         """
+
         if '//' in url:
             # Vault CLI treats a double forward slash ('//') as a single forward slash for a given path.
             # To avoid issues with the requests module's redirection logic, we perform the same translation here.
@@ -242,7 +243,7 @@ class Request(Adapter):
             url = url.replace('//', '/')
 
         url = self.urljoin(self.base_uri, url)
-
+        logger.error('Sending request to URL: %s' % url)
         if not headers:
             headers = {}
 
