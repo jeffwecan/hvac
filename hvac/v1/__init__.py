@@ -13,7 +13,6 @@ try:
 except ImportError:
     has_hcl_parser = False
 
-raise Exception('oops')
 
 class Client(object):
     """The hvac Client class for HashiCorp's Vault."""
