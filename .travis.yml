@@ -36,8 +36,9 @@ deploy:
   provider: pypi
   user: hvac-bot
   password:
-    secure: s9LLuUp1+ZTE3xvXdW9tF9hPUk7jxsFvol3PouDXdSVBNeVUhyHG1fMxOi1p8UOhx7e/iOGv8Bi77z0gDQgcynrFywhHEGbuna92Am40wMFT/Lu+JzHi8y2zBdahNsi80FnlNhW3MEtCNkXI6HgIlBpzEcfSm0ovfuncT0+5fCI=
+    secure: vUZrUEYhQk+MhPyUAkUWAimnBzc8BvMkyYgZjvMSuIAM5hNNazp7gT/6gz6lO+R73l3NTGjBqL1zmaMl1JzWi/QhMGjaaxbuMMVl4xsuXVOSIU3gsQ2PlvVMzdFjbKSldvUbo6Q4OTleutBYfqDZThgD+415EJkQ0i5af3NeKzOpOhw+Ki5UdASK2c9czarpnkKQcDGwETyvY05aqwiSbWwW4xrsbAVm90WcSJEL8+J78gAF9ZY+DVqn3e2quN1O5UilS+XP1SvwiPhJU8YDpZpLS3i9iX4lkxLgUIYuPLxL+E3KgAPGsDTgW/sgqiXoRFYG8GilaUyhAYD1n2GrVklH7/nk5LPZKRErTPanVLjpWPv+ReEXnfa5mk50mNDde9HvTLdxcnQLN+JVYduN4kSnqw1Oiq33xMJzeksu9My7EouCY7ok/L5123vgYESIGJ7plLtPjKI3I3Y3NVjVPLV3WOXe29VUh0pZMstnzKzu4XUbU12yA/gHUp8LaoFLHGiDEJG3mbSEFu3rPstyUMsnwGcZhBKW17bc0kq4aYMxzjSGw7M6MeB/+ZfUmLj2cCNEtzNF+sK3kZKhrGuYDtV/SBkdIHRvdzk0T3vkyZGzb34sIyFdADkHCBb3JTyD2JH9LauwALG6xfR4KMOmA5z2lAEBjVdgyTXMv8J5fDY=
   distributions: "sdist bdist_wheel"
+  server: https://test.pypi.org/index
   skip_existing: true
   skip_cleanup: true
   on:
