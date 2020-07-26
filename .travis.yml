@@ -4,39 +4,39 @@ python:
   - '3.7'
   - '2.7'
 env:
-  - HVAC_VAULT_VERSION=1.5.0 HVAC_VAULT_LICENSE=enterprise
-  - HVAC_VAULT_VERSION=1.4.3 HVAC_VAULT_LICENSE=enterprise
-  - HVAC_VAULT_VERSION=1.3.7 HVAC_VAULT_LICENSE=enterprise
-  - HVAC_VAULT_VERSION=1.2.4 HVAC_VAULT_LICENSE=enterprise
+#   - HVAC_VAULT_VERSION=1.5.0 HVAC_VAULT_LICENSE=enterprise
+#   - HVAC_VAULT_VERSION=1.4.3 HVAC_VAULT_LICENSE=enterprise
+#   - HVAC_VAULT_VERSION=1.3.7 HVAC_VAULT_LICENSE=enterprise
+#   - HVAC_VAULT_VERSION=1.2.4 HVAC_VAULT_LICENSE=enterprise
   - HVAC_VAULT_VERSION=STABLE HVAC_VAULT_LICENSE=OSS
-  - TOXENV=flake8
-matrix:
-  include:
-    - name: 'Vault OSS - Latest hvac-tested Release on Python 3.7'
-      python: '3.7'
-      env: HVAC_VAULT_VERSION=1.2.4 HVAC_VAULT_LICENSE=OSS
-    - name: 'Test Documentation Build - Sphinx: "make html"'
-      env: TOXENV=docs
-    - stage: PyPi Release
-      name: 'Publish to PyPI During Git "tag" Builds'
-      install: skip
-      script: skip
-      before_deploy:
-        - make package
-      deploy:
-        provider: pypi
-        user: hvac-bot
-        password:
-          secure: s9LLuUp1+ZTE3xvXdW9tF9hPUk7jxsFvol3PouDXdSVBNeVUhyHG1fMxOi1p8UOhx7e/iOGv8Bi77z0gDQgcynrFywhHEGbuna92Am40wMFT/Lu+JzHi8y2zBdahNsi80FnlNhW3MEtCNkXI6HgIlBpzEcfSm0ovfuncT0+5fCI=
-        distributions: "sdist bdist_wheel"
-        skip_cleanup: true
-        on:
-          tags: true
-  allow_failures:
-    # Ignore failed tests run against Vault development builds compiled from https://github.com/hashicorp/vault.
-    - env: HVAC_VAULT_VERSION=STABLE HVAC_VAULT_LICENSE=OSS
-  # Don't wait on the "allow_failures" build jobs before reporting on the overall success/failure of the current build.
-  fast_finish: true
+#   - TOXENV=flake8
+# matrix:
+#   include:
+#     - name: 'Vault OSS - Latest hvac-tested Release on Python 3.7'
+#       python: '3.7'
+#       env: HVAC_VAULT_VERSION=1.2.4 HVAC_VAULT_LICENSE=OSS
+#     - name: 'Test Documentation Build - Sphinx: "make html"'
+#       env: TOXENV=docs
+#     - stage: PyPi Release
+#       name: 'Publish to PyPI During Git "tag" Builds'
+#       install: skip
+#       script: skip
+#       before_deploy:
+#         - make package
+#       deploy:
+#         provider: pypi
+#         user: hvac-bot
+#         password:
+#           secure: s9LLuUp1+ZTE3xvXdW9tF9hPUk7jxsFvol3PouDXdSVBNeVUhyHG1fMxOi1p8UOhx7e/iOGv8Bi77z0gDQgcynrFywhHEGbuna92Am40wMFT/Lu+JzHi8y2zBdahNsi80FnlNhW3MEtCNkXI6HgIlBpzEcfSm0ovfuncT0+5fCI=
+#         distributions: "sdist bdist_wheel"
+#         skip_cleanup: true
+#         on:
+#           tags: true
+#   allow_failures:
+#     # Ignore failed tests run against Vault development builds compiled from https://github.com/hashicorp/vault.
+#     - env: HVAC_VAULT_VERSION=STABLE HVAC_VAULT_LICENSE=OSS
+#   # Don't wait on the "allow_failures" build jobs before reporting on the overall success/failure of the current build.
+#   fast_finish: true
 install:
   - tests/scripts/install-consul.sh
   - tests/scripts/install-vault.sh ${HVAC_VAULT_VERSION} ${HVAC_VAULT_LICENSE}
