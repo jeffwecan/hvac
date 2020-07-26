@@ -10,7 +10,7 @@ HVAC_VAULT_DIRECTORY="${3:-$DEFAULT_VAULT_DIRECTORY}"
 
 function build_and_install_vault_ref() {
     if command -v gimme &>"/dev/null"; then
-        eval "$(GIMME_GO_VERSION=1.12.7 gimme)"
+        eval "$(GIMME_GO_VERSION=1.13.7 gimme)"
     fi
     export PATH="$(go env GOPATH)/bin:${PATH}"
 
